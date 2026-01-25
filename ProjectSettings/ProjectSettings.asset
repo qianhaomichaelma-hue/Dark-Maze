@@ -821,7 +821,23 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: 
+    EmbeddedLinux: 
+    GameCoreScarlett: 
+    GameCoreXboxOne: 
+    Kepler: 
+    LinuxHeadlessSimulation: 
+    Nintendo Switch: 
+    PS4: 
+    PS5: 
+    QNX: 
+    ReservedCFE: 
+    Standalone: 
+    VisionOS: 
+    WebGL: 
+    XboxOne: 
+    tvOS: 
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
