@@ -43,18 +43,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "ThrowTorch",
-                    "type": "Button",
-                    "id": "b8152046-d2cc-4530-90d7-486dec7d4be7",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Interact",
                     "type": "Button",
-                    "id": "9448564f-862c-4e17-984e-727b064056bd",
+                    "id": "9dec2298-b68f-4141-9938-2757205b3c90",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -240,19 +231,8 @@
                 },
                 {
                     "name": "",
-                    "id": "213758d7-06c2-4fd9-b8d1-798fe921d524",
-                    "path": "<Keyboard>/q",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "ThrowTorch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "2d1c2b93-717f-4193-ab23-1913f96c6c12",
-                    "path": "<Keyboard>/f",
+                    "id": "de780a4a-ae44-4d21-83ac-e257f73b71ea",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

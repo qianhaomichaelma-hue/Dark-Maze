@@ -1,5 +1,6 @@
 using UnityEngine;
 using StarterAssets;
+using System.Diagnostics;
 
 namespace DarkMazeMinimal
 {
@@ -30,15 +31,41 @@ namespace DarkMazeMinimal
                 GameManager.Instance.RegisterPlayer(this);
         }
 
+        /// <summary>
+        /// Set whether player is in a safe zone. Logs caller + frame for debugging.
+        /// </summary>
         public void SetSafeZone(bool inZone)
         {
+            if (isInSafeZone == inZone) return; // avoid log spam
+
             isInSafeZone = inZone;
+
+            UnityEngine.Debug.Log(
+                $"[PlayerState] SetSafeZone({inZone}) | frame={Time.frameCount} | caller={GetCaller()}",
+                this
+            );
+        }
+
+        private string GetCaller()
+        {
+            // StackTrace is for debugging; keep it here only while you investigate.
+            var stack = new StackTrace();
+            // Frame 0: GetCaller, Frame 1: SetSafeZone, Frame 2: the caller we want
+            if (stack.FrameCount > 2)
+            {
+                var method = stack.GetFrame(2).GetMethod();
+                if (method != null && method.DeclaringType != null)
+                    return $"{method.DeclaringType.Name}.{method.Name}";
+            }
+            return "Unknown";
         }
 
         public void Kill()
         {
             if (isDead) return;
             isDead = true;
+
+            UnityEngine.Debug.Log($"[PlayerState] Killed | frame={Time.frameCount}", this);
 
             // Disable movement/input
             if (starterInputs != null)
@@ -56,12 +83,14 @@ namespace DarkMazeMinimal
             if (GameManager.Instance != null)
                 GameManager.Instance.RequestRespawn();
             else
-                Debug.LogWarning("[PlayerState] No GameManager in scene.");
+                UnityEngine.Debug.LogWarning("[PlayerState] No GameManager in scene.", this);
         }
 
         public void ReviveAt(Transform spawnPoint)
         {
             if (spawnPoint == null) return;
+
+            UnityEngine.Debug.Log($"[PlayerState] ReviveAt({spawnPoint.name}) | frame={Time.frameCount}", this);
 
             // Teleport (CharacterController needs to be disabled briefly)
             if (characterController != null) characterController.enabled = false;
@@ -71,7 +100,10 @@ namespace DarkMazeMinimal
 
             // Reset state
             isDead = false;
-            isInSafeZone = true; // respawn considered safe
+
+            // IMPORTANT: Don't force safe here.
+            // SafeZone status should come from SafeZone trigger (and bonfire.IsLit check).
+            isInSafeZone = false;
 
             // Re-enable movement/input
             if (starterInputs != null) starterInputs.enabled = true;
@@ -79,3 +111,4 @@ namespace DarkMazeMinimal
         }
     }
 }
+

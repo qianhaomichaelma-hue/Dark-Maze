@@ -1,26 +1,59 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DarkMazeMinimal
 {
     public class Bonfire : MonoBehaviour
     {
         [Header("Bonfire State")]
-        [SerializeField] private bool isLit = true;        // future: thrown torch to light
-        [SerializeField] private bool isActivated = false; // checkpoint
+        [SerializeField] private bool isLit = false;
+        [SerializeField] private bool isActivated = false;
 
         [Header("Respawn")]
         [SerializeField] private Transform respawnAnchor;
 
+        public bool IsLit => isLit;
+
+        private void Start()
+        {
+            Debug.Log($"[Bonfire] Start | name={name} | isLit={isLit} | isActivated={isActivated}", this);
+            if (respawnAnchor == null)
+                Debug.LogWarning($"[Bonfire] respawnAnchor is NULL on {name}", this);
+        }
+
         public void TryActivate(PlayerState player)
         {
+            Debug.Log($"[Bonfire] TryActivate called | name={name} | isLit={isLit} | isActivated={isActivated}", this);
+
             if (!isLit) return;
             if (isActivated) return;
 
             isActivated = true;
+            Debug.Log($"[Bonfire] Activated checkpoint | name={name}", this);
 
             if (GameManager.Instance != null && respawnAnchor != null)
                 GameManager.Instance.SetRespawnPoint(respawnAnchor);
         }
+
+        public bool TryIgnite()
+        {
+            Debug.Log($"[Bonfire] TryIgnite called | name={name} | current isLit={isLit}", this);
+
+            if (isLit)
+            {
+                Debug.Log($"[Bonfire] Already lit, ignore | name={name}", this);
+                return false;
+            }
+
+            isLit = true;
+            Debug.Log($"[Bonfire] Ignited SUCCESS | name={name} | frame={Time.frameCount}", this);
+
+            if (GameManager.Instance != null && respawnAnchor != null)
+            {
+                GameManager.Instance.SetRespawnPoint(respawnAnchor);
+                Debug.Log($"[Bonfire] SetRespawnPoint -> {respawnAnchor.name}", this);
+            }
+
+            return true;
+        }
     }
 }
-
