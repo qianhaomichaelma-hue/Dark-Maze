@@ -3,7 +3,8 @@
 namespace DarkMazeMinimal
 {
     public class Bonfire : MonoBehaviour
-    {
+    {       
+        public Light fireLit;
         [Header("Bonfire State")]
         [SerializeField] private bool isLit = false;
         [SerializeField] private bool isActivated = false;
@@ -18,6 +19,9 @@ namespace DarkMazeMinimal
             Debug.Log($"[Bonfire] Start | name={name} | isLit={isLit} | isActivated={isActivated}", this);
             if (respawnAnchor == null)
                 Debug.LogWarning($"[Bonfire] respawnAnchor is NULL on {name}", this);
+
+            // initialize the camp fire
+            fireLit.enabled = isLit;
         }
 
         public void TryActivate(PlayerState player)
@@ -45,6 +49,8 @@ namespace DarkMazeMinimal
             }
 
             isLit = true;
+            // ignite at the same time light up the camp fire
+            fireLit.enabled = true;
             Debug.Log($"[Bonfire] Ignited SUCCESS | name={name} | frame={Time.frameCount}", this);
 
             if (GameManager.Instance != null && respawnAnchor != null)
