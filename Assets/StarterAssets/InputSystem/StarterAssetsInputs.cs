@@ -13,10 +13,9 @@ namespace StarterAssets
         public bool jump;
         public bool sprint;
 
-        // >>> 新增：火把和交互输入状态 <<<
-        [Header("Torch & Interaction")]
-        public bool throwTorch;   // 丢火把
-        public bool interact;     // 交互（捡火把/之后捡水晶）
+        [Header("Interaction")]
+        public bool interact;     // 篝火交互
+        public bool throwItem;    // 投掷石子
 
         [Header("Movement Settings")]
         public bool analogMovement;
@@ -34,9 +33,7 @@ namespace StarterAssets
         public void OnLook(InputValue value)
         {
             if (cursorInputForLook)
-            {
                 LookInput(value.Get<Vector2>());
-            }
         }
 
         public void OnJump(InputValue value)
@@ -49,23 +46,16 @@ namespace StarterAssets
             SprintInput(value.isPressed);
         }
 
-        // >>> 新增：Input System 回调，用于丢火把 <<<
-        public void OnThrowTorch(InputValue value)
-        {
-            // 只在按下那一帧置为 true，在使用处消费后会再置回 false
-            if (value.isPressed)
-            {
-                throwTorch = true;
-            }
-        }
-
-        // >>> 新增：Input System 回调，用于交互（捡火把、水晶） <<<
         public void OnInteract(InputValue value)
         {
             if (value.isPressed)
-            {
                 interact = true;
-            }
+        }
+
+        public void OnThrow(InputValue value)
+        {
+            if (value.isPressed)
+                throwItem = true;
         }
 #endif
 
@@ -100,3 +90,4 @@ namespace StarterAssets
         }
     }
 }
+
