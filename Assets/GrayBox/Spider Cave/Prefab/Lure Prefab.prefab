@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5541135807206355546}
   - component: {fileID: 133348407548906741}
   - component: {fileID: -6553841875637528751}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Lure Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
