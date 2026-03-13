@@ -269242,6 +269242,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   maxSlots: 5
   slots: []
+  equipment: {fileID: 1655468597}
 --- !u!114 &1655468594
 MonoBehaviour:
   m_ObjectHideFlags: 0

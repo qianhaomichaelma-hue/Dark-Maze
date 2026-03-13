@@ -33,8 +33,7 @@ namespace DarkMazeItems
             {
                 if (autoHoldOnPickup)
                 {
-                    var equip = other.GetComponent<PlayerEquipment>();
-                    if (equip != null) equip.Hold(item);
+                    inv.EquipItem(item);
                 }
 
                 Destroy(gameObject);

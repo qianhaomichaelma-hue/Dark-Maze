@@ -46,7 +46,7 @@ namespace DarkMazePlayer
             }
         }
 
-        private void TryThrow()
+        private void TryThrow() // stone
         {
             if (_cam == null) _cam = Camera.main;
             if (_cam == null) return;
@@ -54,13 +54,15 @@ namespace DarkMazePlayer
             if (_inventory == null || stoneItem == null || stonePrefab == null)
                 return;
 
-            // 消耗 1 个石子
-            if (!_inventory.TryRemove(stoneItem, 1))
+
+            // 消耗 1 个当前物品
+            if (!_inventory.TryGetCurrentItem(1, stoneItem))
             {
                 Debug.Log("[PlayerThrower] No stone available.");
                 return;
             }
 
+            // stone
             Vector3 origin = throwOrigin.position;
             Vector3 dir = _cam.transform.forward;
 
@@ -71,8 +73,13 @@ namespace DarkMazePlayer
                 Vector3 impulse = dir.normalized * throwForce + Vector3.up * upwardForce;
                 rb.AddForce(impulse, ForceMode.Impulse);
             }
-
             Debug.Log("[PlayerThrower] Stone thrown.");
+            // update inventory if we need
+            if(_inventory.currentSlot.count == 0)
+            {
+                _inventory.TryRemoveCurrent();
+                _inventory.UpdateCurrentSlot();
+            }
         }
     }
 }

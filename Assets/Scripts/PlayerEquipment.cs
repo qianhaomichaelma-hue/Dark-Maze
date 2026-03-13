@@ -24,5 +24,6 @@ namespace DarkMazePlayer
             heldItem = null;
             Debug.Log("[Equipment] Holding cleared");
         }
+        
     }
 }

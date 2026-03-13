@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using DarkMazePlayer;
+using StarterAssets;
 
 namespace DarkMazeItems
 {
@@ -20,8 +22,16 @@ namespace DarkMazeItems
 
         [SerializeField] private List<Slot> slots = new List<Slot>();
 
+        int currentIndex = 0;
+
+        public PlayerEquipment equipment;
+
         public IReadOnlyList<Slot> Slots => slots;
         public int SlotCount => slots.Count;
+
+        public Slot currentSlot => slots[currentIndex];
+
+        private StarterAssetsInputs _inputs;
 
         public bool Has(ItemData item, int amount = 1)
         {
@@ -35,7 +45,6 @@ namespace DarkMazeItems
 
             return false;
         }
-
         public bool TryAdd(ItemData item, int amount)
         {
             if (item == null || amount <= 0) return false;
@@ -78,7 +87,6 @@ namespace DarkMazeItems
 
             return true;
         }
-
         public bool TryRemove(ItemData item, int amount)
         {
             if (item == null || amount <= 0) return false;
@@ -104,10 +112,85 @@ namespace DarkMazeItems
 
             return false;
         }
+        public void TryRemoveCurrent()
+        {
+            slots.RemoveAt(currentIndex);
+        }
+        public bool TryGetCurrentItem(int amount, ItemData targetItem)
+        {
+            if (amount <= 0) return false;
 
+            if (SlotCount <= 0)
+                return false;
+            else if(currentSlot.item != targetItem)
+            {
+                return false;
+            }
+            else
+            {
+                Debug.Log($"[Inventory] Removed {currentSlot.item.displayName}");
+                currentSlot.count--;
+                return true;
+            }
+        }
+        private void TrySwitchEquipmentItem()
+        {
+            // special circ...
+            if(SlotCount == 0 || SlotCount == 1)
+            {
+                return;
+            }
+
+            // deal the change logic
+            if(currentIndex == SlotCount - 1)
+            {
+                currentIndex = 0;
+            }
+            else
+            {
+                currentIndex += 1;
+            }
+
+            equipment.Hold(slots[currentIndex].item);
+        }
+        public void UpdateCurrentSlot()
+        {
+            // special circ...
+            if (SlotCount == 0)
+            {
+                equipment.Hold(null);
+                return;
+            }
+            else
+            {
+                equipment.Hold(slots[0].item);
+                currentIndex = 0;
+                return;
+            }
+        }
+        public void EquipItem(ItemData item)
+        {
+            equipment.Hold(item);
+            currentIndex = SlotCount - 1;
+        }
         public List<Slot> GetAllSlots()
         {
             return slots;
+        }
+
+        private void Awake()
+        {
+            _inputs = GetComponent<StarterAssetsInputs>();
+        }
+        private void Update()
+        {
+            if (_inputs == null) return;
+
+            if (_inputs.switchEquipment)
+            {
+                _inputs.switchEquipment = false; // œ˚∑— ‰»Î
+                TrySwitchEquipmentItem();
+            }
         }
     }
 }
