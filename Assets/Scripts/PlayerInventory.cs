@@ -20,13 +20,19 @@ namespace DarkMazeItems
 
         [SerializeField] private List<Slot> slots = new List<Slot>();
 
+        public IReadOnlyList<Slot> Slots => slots;
+        public int SlotCount => slots.Count;
+
         public bool Has(ItemData item, int amount = 1)
         {
             if (item == null) return false;
+
             foreach (var s in slots)
             {
-                if (s.item == item && s.count >= amount) return true;
+                if (s.item == item && s.count >= amount)
+                    return true;
             }
+
             return false;
         }
 
@@ -44,6 +50,7 @@ namespace DarkMazeItems
                         int canAdd = Mathf.Min(amount, item.maxStack - s.count);
                         s.count += canAdd;
                         amount -= canAdd;
+
                         if (amount <= 0)
                         {
                             Debug.Log($"[Inventory] Added {item.displayName}. Now: {s.count}");
@@ -96,6 +103,11 @@ namespace DarkMazeItems
             }
 
             return false;
+        }
+
+        public List<Slot> GetAllSlots()
+        {
+            return slots;
         }
     }
 }

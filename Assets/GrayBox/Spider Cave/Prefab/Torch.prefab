@@ -44,7 +44,7 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 0.8272411, b: 0.627451, a: 1}
-  m_Intensity: 8.86
+  m_Intensity: 0.62
   m_Range: 9.55
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -140,6 +140,7 @@ GameObject:
   - component: {fileID: 2894043991703285556}
   - component: {fileID: 978178860219616377}
   - component: {fileID: 5138186390460329182}
+  - component: {fileID: 2042534538355564334}
   m_Layer: 0
   m_Name: Torch
   m_TagString: Untagged
@@ -234,12 +235,12 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 1.6039395
-  m_Height: 2.104078
+  m_Radius: 5.31
+  m_Height: 3.64
   m_Direction: 1
   m_Center: {x: -0.031438775, y: -0.003741228, z: -0.00000009635875}
 --- !u!54 &5138186390460329182
@@ -264,8 +265,23 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2042534538355564334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709820563564004756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93cb614d6f28adc439b7bc4b7c94cbfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PickupItem
+  item: {fileID: 11400000, guid: 50b10e6bc95483640b4fecf142bdb673, type: 2}
+  amount: 1
+  autoHoldOnPickup: 1
