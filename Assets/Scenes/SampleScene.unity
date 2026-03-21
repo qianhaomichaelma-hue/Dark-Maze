@@ -867,7 +867,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 22934
   m_Size: {x: 6.665741, y: 2.7189813, z: -4.93141}
-  m_LocalCenter: {x: 0.21909809, y: 0.019016504, z: 4.890918}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -9298,7 +9298,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7846
   m_Size: {x: 2.2247696, y: 0.99033403, z: 2.1710358}
-  m_LocalCenter: {x: -1.2522049, y: 0, z: 1.0402145}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -9748,6 +9748,7 @@ GameObject:
   - component: {fileID: 113302123}
   - component: {fileID: 113302122}
   - component: {fileID: 113302127}
+  - component: {fileID: 113302128}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
@@ -9791,7 +9792,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 736592087}
+  m_Mesh: {fileID: 0}
 --- !u!33 &113302123
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -9799,7 +9800,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 113302120}
-  m_Mesh: {fileID: 736592087}
+  m_Mesh: {fileID: 0}
 --- !u!23 &113302124
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9862,7 +9863,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 15139
   m_Size: {x: -116.862885, y: 1.3677654, z: 118.20932}
-  m_LocalCenter: {x: -5.9368286, y: 0.19039536, z: 13.077515}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -10098,7 +10099,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
-  m_SerializedVersion: 0
   m_AgentTypeID: 0
   m_CollectObjects: 0
   m_Size: {x: 10, y: 10, z: 10}
@@ -10118,6 +10118,41 @@ MonoBehaviour:
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 6882d6f56d8d4304aa92be1f8805d98c, type: 2}
   m_BuildHeightMesh: 0
+--- !u!114 &113302128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 113302120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8233d90336aea43098adf6dbabd606a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MeshFormatVersion: 0
+  m_Faces: []
+  m_SharedVertices: []
+  m_SharedTextures: []
+  m_Positions: []
+  m_Textures0: []
+  m_Textures2: []
+  m_Textures3: []
+  m_Tangents: []
+  m_Colors: []
+  m_UnwrapParameters:
+    m_HardAngle: 88
+    m_PackMargin: 20
+    m_AngleError: 8
+    m_AreaError: 15
+  m_PreserveMeshAssetOnDestroy: 0
+  assetGuid: 
+  m_Mesh: {fileID: 0}
+  m_VersionIndex: 0
+  m_IsSelectable: 1
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
 --- !u!43 &121793781
 Mesh:
   m_ObjectHideFlags: 0
@@ -11492,13 +11527,13 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
+  m_ActiveFontFeatures: 
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -12637,7 +12672,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 17241
   m_Size: {x: -24.450459, y: 0.43181443, z: -16.540619}
-  m_LocalCenter: {x: -5.789451, y: -1.2625761, z: -3.718324}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -14441,7 +14476,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 25879
   m_Size: {x: 6.2506294, y: 2.7189813, z: -10.231392}
-  m_LocalCenter: {x: 0.3403319, y: 0.019016474, z: 7.540903}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -21600,7 +21635,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -28420,7 +28455,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -28878,7 +28913,7 @@ PrefabInstance:
       objectReference: {fileID: 210302767}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -29669,13 +29704,13 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
+  m_ActiveFontFeatures: 
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -31395,7 +31430,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -37872,7 +37907,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 8968
   m_Size: {x: 2.4680939, y: 0.99033403, z: 1.9709625}
-  m_LocalCenter: {x: -1.130539, y: 0, z: 1.1402435}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -38573,7 +38608,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7105
   m_Size: {x: -9.1414795, y: 4.9539795, z: -0.51613617}
-  m_LocalCenter: {x: 0.43387222, y: 0.570559, z: -1.7117462}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -39051,7 +39086,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -39090,7 +39125,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 23420
   m_Size: {x: 8.007255, y: 2.841312, z: -8.99794}
-  m_LocalCenter: {x: 0.2899103, y: 0.08018184, z: 6.924187}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -46265,7 +46300,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -53770,13 +53805,13 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
+  m_ActiveFontFeatures: 
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -56038,7 +56073,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 23582
   m_Size: {x: 7.8603516, y: 3.899775, z: -8.99794}
-  m_LocalCenter: {x: 0.37905192, y: 0.6094134, z: 6.9241796}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -62472,7 +62507,7 @@ PrefabInstance:
       objectReference: {fileID: 1987704410}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -63158,6 +63193,7 @@ GameObject:
   - component: {fileID: 593778529}
   - component: {fileID: 593778528}
   - component: {fileID: 593778527}
+  - component: {fileID: 593778533}
   m_Layer: 0
   m_Name: Arch (15)
   m_TagString: Untagged
@@ -63186,7 +63222,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 97274253}
+  m_Mesh: {fileID: 0}
 --- !u!33 &593778528
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -63194,7 +63230,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 593778526}
-  m_Mesh: {fileID: 97274253}
+  m_Mesh: {fileID: 0}
 --- !u!23 &593778529
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -63257,7 +63293,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -69621,6 +69657,41 @@ Transform:
   m_Children: []
   m_Father: {fileID: 775964886}
   m_LocalEulerAnglesHint: {x: 0, y: 3.698, z: 0}
+--- !u!114 &593778533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 593778526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8233d90336aea43098adf6dbabd606a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MeshFormatVersion: 0
+  m_Faces: []
+  m_SharedVertices: []
+  m_SharedTextures: []
+  m_Positions: []
+  m_Textures0: []
+  m_Textures2: []
+  m_Textures3: []
+  m_Tangents: []
+  m_Colors: []
+  m_UnwrapParameters:
+    m_HardAngle: 88
+    m_PackMargin: 20
+    m_AngleError: 8
+    m_AreaError: 15
+  m_PreserveMeshAssetOnDestroy: 0
+  assetGuid: 
+  m_Mesh: {fileID: 0}
+  m_VersionIndex: 0
+  m_IsSelectable: 1
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
 --- !u!4 &600028335 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6807413777887945440, guid: 64d13543bdb43ff439d2638c33a39d43, type: 3}
@@ -71376,7 +71447,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -78972,6 +79043,21 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!115 &634673203
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: ProBuilderMesh
+  m_Namespace: UnityEngine.ProBuilder
+  m_AssemblyName: Unity.ProBuilder
 --- !u!1001 &651793538
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -79838,7 +79924,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 22696
   m_Size: {x: 6.2506294, y: 2.7189813, z: -2.9560623}
-  m_LocalCenter: {x: 0.34033144, y: 0.019016474, z: 3.9032388}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -86330,7 +86416,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 14876
   m_Size: {x: -24.450459, y: 0.43181443, z: -22.613617}
-  m_LocalCenter: {x: -5.7894535, y: -1.2625761, z: -0.68181837}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -88695,7 +88781,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7846
   m_Size: {x: 2.2247696, y: 0.99033403, z: 2.1710358}
-  m_LocalCenter: {x: -1.2522049, y: 0, z: 1.0402145}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -89047,7 +89133,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -98966,7 +99052,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 25427
   m_Size: {x: 8.358368, y: 3.0846467, z: -8.99794}
-  m_LocalCenter: {x: 0.30105817, y: 0.20184922, z: 6.9241858}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -105846,7 +105932,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 25879
   m_Size: {x: 6.2506294, y: 2.7189813, z: -10.231392}
-  m_LocalCenter: {x: 0.3403319, y: 0.019016474, z: 7.540903}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -114247,7 +114333,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 23348
   m_Size: {x: 7.761753, y: 3.0575156, z: -8.99794}
-  m_LocalCenter: {x: 0.109954536, y: 0.18828368, z: 6.924185}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -120955,7 +121041,7 @@ PrefabInstance:
       objectReference: {fileID: 1571491239}
     - target: {fileID: 1102081961847984649, guid: 7f492fdf5185c0146bb832ef614c5f35, type: 3}
       propertyPath: m_VersionIndex
-      value: 10106
+      value: 10109
       objectReference: {fileID: 0}
     - target: {fileID: 2119188325252529109, guid: 7f492fdf5185c0146bb832ef614c5f35, type: 3}
       propertyPath: m_Mesh
@@ -122320,7 +122406,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 8968
   m_Size: {x: 2.4680939, y: 0.99033403, z: 1.9709625}
-  m_LocalCenter: {x: -1.130539, y: 0, z: 1.1402435}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -122672,7 +122758,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -129314,7 +129400,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7846
   m_Size: {x: 2.2247696, y: 0.99033403, z: 2.1710358}
-  m_LocalCenter: {x: -1.2522049, y: 0, z: 1.0402145}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -131543,7 +131629,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 22934
   m_Size: {x: 6.665741, y: 2.7189813, z: -4.93141}
-  m_LocalCenter: {x: 0.21909809, y: 0.019016504, z: 4.890918}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -139194,7 +139280,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -145933,7 +146019,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -145972,7 +146058,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7022
   m_Size: {x: -9.381027, y: 0.37355733, z: -6.2737885}
-  m_LocalCenter: {x: 0.76119804, y: -0.37825155, z: -0.061790466}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -146968,7 +147054,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -147007,7 +147093,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 4958
   m_Size: {x: -0.4747467, y: 6.469566, z: 6.0275803}
-  m_LocalCenter: {x: 0.34099197, y: 0.19677067, z: 0.3637085}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -148102,7 +148188,7 @@ PrefabInstance:
       objectReference: {fileID: 586308554}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -149837,7 +149923,7 @@ PrefabInstance:
       objectReference: {fileID: 2138633925}
     - target: {fileID: 1102081961847984649, guid: 7f492fdf5185c0146bb832ef614c5f35, type: 3}
       propertyPath: m_VersionIndex
-      value: 10106
+      value: 10109
       objectReference: {fileID: 0}
     - target: {fileID: 2119188325252529109, guid: 7f492fdf5185c0146bb832ef614c5f35, type: 3}
       propertyPath: m_Mesh
@@ -149910,6 +149996,7 @@ GameObject:
   - component: {fileID: 1159229919}
   - component: {fileID: 1159229918}
   - component: {fileID: 1159229917}
+  - component: {fileID: 1159229922}
   m_Layer: 0
   m_Name: Cube (8)
   m_TagString: Untagged
@@ -149953,7 +150040,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 1900133211}
+  m_Mesh: {fileID: 0}
 --- !u!33 &1159229918
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -149961,7 +150048,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1159229915}
-  m_Mesh: {fileID: 1900133211}
+  m_Mesh: {fileID: 0}
 --- !u!23 &1159229919
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -150024,7 +150111,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 16603
   m_Size: {x: -73.53003, y: 0.43181443, z: -86.672935}
-  m_LocalCenter: {x: 2.9423487, y: -1.262577, z: -8.308667}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -150244,6 +150331,41 @@ MonoBehaviour:
   assetGuid: 
   m_Mesh: {fileID: 1900133211}
   m_VersionIndex: 16603
+  m_IsSelectable: 1
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
+--- !u!114 &1159229922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1159229915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 634673203}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MeshFormatVersion: 0
+  m_Faces: []
+  m_SharedVertices: []
+  m_SharedTextures: []
+  m_Positions: []
+  m_Textures0: []
+  m_Textures2: []
+  m_Textures3: []
+  m_Tangents: []
+  m_Colors: []
+  m_UnwrapParameters:
+    m_HardAngle: 88
+    m_PackMargin: 20
+    m_AngleError: 8
+    m_AreaError: 15
+  m_PreserveMeshAssetOnDestroy: 0
+  assetGuid: 
+  m_Mesh: {fileID: 0}
+  m_VersionIndex: 0
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -151813,7 +151935,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 25879
   m_Size: {x: 6.2506294, y: 2.7189813, z: -10.231392}
-  m_LocalCenter: {x: 0.3403319, y: 0.019016474, z: 7.540903}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -158455,7 +158577,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -166595,7 +166717,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 22268
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909627, y: 0.019016504, z: 6.92418}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -173382,7 +173504,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -173421,7 +173543,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -179898,7 +180020,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -187193,7 +187315,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -194642,7 +194764,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 10311
   m_Size: {x: -18.616497, y: 0.43181443, z: -17.4105}
-  m_LocalCenter: {x: -4.133892, y: -1.2625761, z: -1.7551407}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -197204,7 +197326,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -197243,7 +197365,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -205766,7 +205888,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 17341
   m_Size: {x: 6.2506294, y: 2.7189813, z: -0.8022461}
-  m_LocalCenter: {x: 0.34033018, y: 0.019016474, z: 2.8263326}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -213224,7 +213346,7 @@ PrefabInstance:
       objectReference: {fileID: 567742472}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -213305,7 +213427,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -213344,7 +213466,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 6874
   m_Size: {x: -8.744522, y: 5.076516, z: -0.51613617}
-  m_LocalCenter: {x: 0.23539352, y: 0.63182735, z: -1.7117462}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -214388,7 +214510,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -214939,7 +215061,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -257088,10 +257210,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.ProBuilder::UnityEngine.ProBuilder.Shapes.ProBuilderShape
   m_Shape:
     rid: 7007940233777905798
-  m_ShapeRotation: {x: 0, y: 0, z: 0, w: 0.9999999}
+  m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 6519
   m_Size: {x: -3.005659, y: 2.7832766, z: -1.265724}
-  m_LocalCenter: {x: -0.29675388, y: -0.05520487, z: 0.6779785}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -257406,7 +257528,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21184
   m_Size: {x: 6.2506294, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.34033036, y: 0.019016474, z: 6.924176}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -269459,7 +269581,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 22934
   m_Size: {x: 6.665741, y: 2.7189813, z: -4.93141}
-  m_LocalCenter: {x: 0.21909809, y: 0.019016504, z: 4.890918}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -276266,7 +276388,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -285033,7 +285155,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -292689,7 +292811,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 8968
   m_Size: {x: 2.4680939, y: 0.99033403, z: 1.9709625}
-  m_LocalCenter: {x: -1.130539, y: 0, z: 1.1402435}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -294767,7 +294889,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -302069,7 +302191,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 25879
   m_Size: {x: 6.2506294, y: 2.7189813, z: -10.231392}
-  m_LocalCenter: {x: 0.3403319, y: 0.019016474, z: 7.540903}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -308488,7 +308610,7 @@ PrefabInstance:
     - target: {fileID: 6211046633026541317, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 1987704410}
+      objectReference: {fileID: 873652226}
     - target: {fileID: 8044337693161490325, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -308503,7 +308625,7 @@ PrefabInstance:
       objectReference: {fileID: 873652226}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -310439,7 +310561,7 @@ PrefabInstance:
       objectReference: {fileID: 1228032675}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -310602,7 +310724,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 24565
   m_Size: {x: 8.719795, y: 3.177772, z: -36.061043}
-  m_LocalCenter: {x: 0.28763914, y: 0.2484119, z: -6.607376}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -318360,7 +318482,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -324837,7 +324959,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 22934
   m_Size: {x: 6.665741, y: 2.7189813, z: -4.93141}
-  m_LocalCenter: {x: 0.21909809, y: 0.019016504, z: 4.890918}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -333565,7 +333687,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7846
   m_Size: {x: 2.2247696, y: 0.99033403, z: 2.1710358}
-  m_LocalCenter: {x: -1.2522049, y: 0, z: 1.0402145}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -333917,7 +334039,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 8541
   m_Size: {x: -19.993984, y: 4.678017, z: -9.426483}
-  m_LocalCenter: {x: 1.7784014, y: 0.93904495, z: -3.1156712}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -340167,7 +340289,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -342323,7 +342445,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -348800,7 +348922,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7870
   m_Size: {x: 0.4253502, y: 8.210981, z: 6.132057}
-  m_LocalCenter: {x: -1.6187057, y: 0.5669775, z: -0.7488251}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -349109,7 +349231,7 @@ PrefabInstance:
       objectReference: {fileID: 1569555676}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -349375,7 +349497,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: c0a40b6477860d0458e49394a79c0e79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -349414,7 +349536,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7336
   m_Size: {x: -11.77285, y: 0.76613796, z: 14.177181}
-  m_LocalCenter: {x: -0.0000016093254, y: -0.793766, z: 1.0164081}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -351654,7 +351776,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 21799
   m_Size: {x: 6.665741, y: 2.7189813, z: -8.99794}
-  m_LocalCenter: {x: 0.21909642, y: 0.019016504, z: 6.9241834}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -359220,10 +359342,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.ProBuilder::UnityEngine.ProBuilder.Shapes.ProBuilderShape
   m_Shape:
     rid: 7007940233777905798
-  m_ShapeRotation: {x: 0, y: 0, z: 0, w: 0.9999999}
+  m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 6519
   m_Size: {x: -3.005659, y: 2.7832766, z: -1.265724}
-  m_LocalCenter: {x: -0.29675388, y: -0.05520487, z: 0.6779785}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -360301,7 +360423,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 13177
   m_Size: {x: -6.310236, y: 2.9198217, z: 7.290146}
-  m_LocalCenter: {x: 0.35670727, y: 0.26717234, z: -2.427112}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -360638,7 +360760,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 7846
   m_Size: {x: 2.2247696, y: 0.99033403, z: 2.1710358}
-  m_LocalCenter: {x: -1.2522049, y: 0, z: 1.0402145}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -361587,6 +361709,7 @@ GameObject:
   - component: {fileID: 2145976218}
   - component: {fileID: 2145976217}
   - component: {fileID: 2145976216}
+  - component: {fileID: 2145976221}
   m_Layer: 0
   m_Name: Cube (5)
   m_TagString: Untagged
@@ -361630,7 +361753,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 1149573463}
+  m_Mesh: {fileID: 0}
 --- !u!33 &2145976217
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -361638,7 +361761,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2145976214}
-  m_Mesh: {fileID: 1149573463}
+  m_Mesh: {fileID: 0}
 --- !u!23 &2145976218
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -361701,7 +361824,7 @@ MonoBehaviour:
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
   m_UnmodifiedMeshVersion: 12951
   m_Size: {x: -22.8866, y: 0.43181443, z: -19.216766}
-  m_LocalCenter: {x: -6.268944, y: -1.2625761, z: -2.3802376}
+  m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
     version: 2
     RefIds:
@@ -361921,6 +362044,41 @@ MonoBehaviour:
   assetGuid: 
   m_Mesh: {fileID: 1149573463}
   m_VersionIndex: 12951
+  m_IsSelectable: 1
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
+--- !u!114 &2145976221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145976214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 634673203}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MeshFormatVersion: 0
+  m_Faces: []
+  m_SharedVertices: []
+  m_SharedTextures: []
+  m_Positions: []
+  m_Textures0: []
+  m_Textures2: []
+  m_Textures3: []
+  m_Tangents: []
+  m_Colors: []
+  m_UnwrapParameters:
+    m_HardAngle: 88
+    m_PackMargin: 20
+    m_AngleError: 8
+    m_AreaError: 15
+  m_PreserveMeshAssetOnDestroy: 0
+  assetGuid: 
+  m_Mesh: {fileID: 0}
+  m_VersionIndex: 0
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -362247,7 +362405,7 @@ PrefabInstance:
       objectReference: {fileID: 750820763}
     - target: {fileID: 1102081961847984649, guid: 7f492fdf5185c0146bb832ef614c5f35, type: 3}
       propertyPath: m_VersionIndex
-      value: 10109
+      value: 10112
       objectReference: {fileID: 0}
     - target: {fileID: 2119188325252529109, guid: 7f492fdf5185c0146bb832ef614c5f35, type: 3}
       propertyPath: m_Mesh
@@ -362372,7 +362530,7 @@ PrefabInstance:
       objectReference: {fileID: 1632517099}
     - target: {fileID: 9216024008938838273, guid: b8d000e2e2e1f4749bf1312a37b760c5, type: 3}
       propertyPath: m_VersionIndex
-      value: 10097
+      value: 10100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
