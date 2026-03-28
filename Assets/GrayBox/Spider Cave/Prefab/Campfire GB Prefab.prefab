@@ -174,7 +174,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 2
-  m_Color: {r: 1, g: 0.8838066, b: 0.30980396, a: 1}
+  m_Color: {r: 0.9308176, g: 0.88242066, b: 0.6468889, a: 1}
   m_Intensity: 13.48
   m_Range: 17.61
   m_SpotAngle: 30
@@ -647,7 +647,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 10103
+  m_VersionIndex: 10112
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []

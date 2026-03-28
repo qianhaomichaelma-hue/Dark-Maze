@@ -9,6 +9,7 @@ namespace DarkMazeMinimal
         private enum EnemyState
         {
             Patrol,
+            Suspicious,
             Chase,
             Return
         }
@@ -17,6 +18,7 @@ namespace DarkMazeMinimal
         [SerializeField] private PlayerState player;
         [SerializeField] private Transform homePoint;
         [SerializeField] private Transform activityCenter;
+        [SerializeField] private EnemyAlertMark alertMark;
 
         [Header("Patrol")]
         [SerializeField] private Transform[] patrolPoints;
@@ -24,14 +26,24 @@ namespace DarkMazeMinimal
         [SerializeField] private float patrolPointReachDistance = 0.5f;
 
         [Header("Detection")]
+        [SerializeField] private float suspiciousRange = 10f;
         [SerializeField] private float detectRange = 6f;
         [SerializeField] private float loseTargetRange = 10f;
+
+        [Header("Suspicious")]
+        [SerializeField] private float suspiciousStayTime = 1.5f;
+        [SerializeField] private float suspiciousScanSpeed = 100f;
+        [SerializeField] private float suspiciousPointReachDistance = 0.8f;
 
         [Header("Activity Area")]
         [SerializeField] private float activityRadius = 12f;
 
         [Header("Lure")]
         [SerializeField] private float lureMaxConsiderDistance = 25f;
+
+        [Header("Hit Reaction")]
+        [SerializeField] private float hitBackDistance = 1.2f;
+        [SerializeField] private float hitRecoverTime = 0.25f;
 
         [Header("Update")]
         [SerializeField] private float updateRate = 0.1f;
@@ -42,11 +54,22 @@ namespace DarkMazeMinimal
         private int _currentPatrolIndex = 0;
         private float _waitTimer = 0f;
         private float _updateTimer = 0f;
+        private float _suspiciousTimer = 0f;
+        private float _hitRecoverTimer = 0f;
+
+        private Vector3 _suspiciousTarget;
+        private bool _hasSuspiciousTarget = false;
+        private bool _reachedSuspiciousTarget = false;
+        private int _scanDirection = 1;
 
         private PlayerChaseTracker _chaseTracker;
         private bool _isCurrentlyChasingPlayer = false;
 
+        // 新增：击退保护窗口，避免刚击退就立刻被 Chase 覆盖 destination
+        private bool _isRepelling = false;
+
         public bool IsChasingPlayer => _isCurrentlyChasingPlayer;
+        public bool IsSuspicious => _state == EnemyState.Suspicious;
 
         private void Awake()
         {
@@ -77,11 +100,10 @@ namespace DarkMazeMinimal
             if (patrolPoints == null || patrolPoints.Length == 0)
                 Debug.LogWarning($"[EnemyChaser] No patrol points assigned on {name}", this);
 
-            Debug.Log(
-                $"[EnemyChaser] Start | player={(player ? player.name : "NULL")} | home={(homePoint ? homePoint.name : "NULL")} | center={(activityCenter ? activityCenter.name : "NULL")}",
-                this
-            );
+            if (alertMark == null)
+                alertMark = GetComponentInChildren<EnemyAlertMark>(true);
 
+            RefreshAlertMark();
             EnterPatrolState();
         }
 
@@ -89,6 +111,17 @@ namespace DarkMazeMinimal
         {
             if (player == null || homePoint == null || activityCenter == null)
                 return;
+
+            if (_hitRecoverTimer > 0f)
+            {
+                _hitRecoverTimer -= Time.deltaTime;
+
+                if (_hitRecoverTimer <= 0f)
+                {
+                    _hitRecoverTimer = 0f;
+                    _isRepelling = false;
+                }
+            }
 
             _updateTimer += Time.deltaTime;
             if (_updateTimer < updateRate) return;
@@ -100,6 +133,10 @@ namespace DarkMazeMinimal
                     UpdatePatrol();
                     break;
 
+                case EnemyState.Suspicious:
+                    UpdateSuspicious();
+                    break;
+
                 case EnemyState.Chase:
                     UpdateChase();
                     break;
@@ -108,6 +145,8 @@ namespace DarkMazeMinimal
                     UpdateReturn();
                     break;
             }
+
+            RefreshAlertMark();
         }
 
         private void OnDisable()
@@ -120,39 +159,65 @@ namespace DarkMazeMinimal
             StopChasingPlayer();
         }
 
-        // =========================
-        // State Enter
-        // =========================
-
         private void EnterPatrolState()
         {
             _state = EnemyState.Patrol;
             _waitTimer = 0f;
+            _suspiciousTimer = 0f;
+            _hasSuspiciousTarget = false;
+            _reachedSuspiciousTarget = false;
+            _isRepelling = false;
+            _hitRecoverTimer = 0f;
 
             StopChasingPlayer();
 
             if (patrolPoints != null && patrolPoints.Length > 0)
-            {
                 MoveToPatrolPoint(_currentPatrolIndex);
-            }
             else
-            {
                 MoveToPosition(homePoint.position);
-            }
 
+            RefreshAlertMark();
             Debug.Log($"[EnemyChaser] Enter PATROL | {name}", this);
+        }
+
+        private void EnterSuspiciousState(Vector3 targetPos)
+        {
+            _state = EnemyState.Suspicious;
+            _suspiciousTarget = targetPos;
+            _hasSuspiciousTarget = true;
+            _reachedSuspiciousTarget = false;
+            _suspiciousTimer = 0f;
+            _scanDirection = 1;
+            _isRepelling = false;
+            _hitRecoverTimer = 0f;
+
+            StopChasingPlayer();
+            MoveToPosition(_suspiciousTarget);
+
+            RefreshAlertMark();
+            Debug.Log($"[EnemyChaser] Enter SUSPICIOUS | {name}", this);
         }
 
         private void EnterChaseState()
         {
             _state = EnemyState.Chase;
+            _isRepelling = false;
+            _hitRecoverTimer = 0f;
+
             BeginChasingPlayer();
+
+            RefreshAlertMark();
             Debug.Log($"[EnemyChaser] Enter CHASE | {name}", this);
         }
 
         private void EnterReturnState()
         {
             _state = EnemyState.Return;
+            _suspiciousTimer = 0f;
+            _hasSuspiciousTarget = false;
+            _reachedSuspiciousTarget = false;
+            _isRepelling = false;
+            _hitRecoverTimer = 0f;
 
             StopChasingPlayer();
 
@@ -162,38 +227,36 @@ namespace DarkMazeMinimal
             else
                 MoveToPosition(homePoint.position);
 
+            RefreshAlertMark();
             Debug.Log($"[EnemyChaser] Enter RETURN | {name}", this);
         }
 
-        // =========================
-        // State Update
-        // =========================
-
         private void UpdatePatrol()
         {
-            // 如果场景中有 lure，优先去 lure
             if (TryGetNearestLure(out Vector3 lurePos))
             {
-                StopChasingPlayer();
-                MoveToPosition(lurePos);
+                EnterSuspiciousState(lurePos);
                 return;
             }
 
-            // 检查是否开始追击
             if (CanStartChase())
             {
                 EnterChaseState();
                 return;
             }
 
-            // 没有巡逻点就待在 home
+            if (CanStartSuspicious(out Vector3 suspiciousPos))
+            {
+                EnterSuspiciousState(suspiciousPos);
+                return;
+            }
+
             if (patrolPoints == null || patrolPoints.Length == 0)
             {
                 MoveToPosition(homePoint.position);
                 return;
             }
 
-            // 到达巡逻点后等待，再走下一个
             if (!_agent.pathPending && _agent.remainingDistance <= patrolPointReachDistance)
             {
                 _waitTimer += updateRate;
@@ -207,31 +270,81 @@ namespace DarkMazeMinimal
             }
         }
 
-        private void UpdateChase()
+        private void UpdateSuspicious()
         {
-            // lure 优先级最高
             if (TryGetNearestLure(out Vector3 lurePos))
             {
-                StopChasingPlayer();
-                MoveToPosition(lurePos);
+                _suspiciousTarget = lurePos;
+                _hasSuspiciousTarget = true;
+                _reachedSuspiciousTarget = false;
+                _suspiciousTimer = 0f;
+                MoveToPosition(_suspiciousTarget);
+            }
+
+            if (CanStartChase())
+            {
+                EnterChaseState();
                 return;
             }
 
-            // 脱战条件 1：玩家死了
+            if (player.IsDead || player.IsInSafeZone || !IsInsideActivityArea(player.transform.position))
+            {
+                EnterReturnState();
+                return;
+            }
+
+            if (!_hasSuspiciousTarget)
+            {
+                EnterReturnState();
+                return;
+            }
+
+            if (!_reachedSuspiciousTarget)
+            {
+                if (!_agent.pathPending && _agent.remainingDistance <= suspiciousPointReachDistance)
+                {
+                    _reachedSuspiciousTarget = true;
+                    _agent.isStopped = true;
+                }
+
+                return;
+            }
+
+            _suspiciousTimer += updateRate;
+
+            float turnAmount = suspiciousScanSpeed * updateRate * _scanDirection;
+            transform.Rotate(0f, turnAmount, 0f);
+
+            if (_suspiciousTimer >= suspiciousStayTime * 0.5f && _scanDirection > 0)
+                _scanDirection = -1;
+
+            if (_suspiciousTimer >= suspiciousStayTime)
+            {
+                _agent.isStopped = false;
+                EnterReturnState();
+            }
+        }
+
+        private void UpdateChase()
+        {
+            if (TryGetNearestLure(out Vector3 lurePos))
+            {
+                EnterSuspiciousState(lurePos);
+                return;
+            }
+
             if (player.IsDead)
             {
                 EnterReturnState();
                 return;
             }
 
-            // 脱战条件 2：玩家进入安全区
             if (player.IsInSafeZone)
             {
                 EnterReturnState();
                 return;
             }
 
-            // 脱战条件 3：玩家超出脱战范围
             float distToPlayer = Vector3.Distance(transform.position, player.transform.position);
             if (distToPlayer > loseTargetRange)
             {
@@ -239,14 +352,12 @@ namespace DarkMazeMinimal
                 return;
             }
 
-            // 脱战条件 4：敌人自己跑出活动区域
             if (!IsInsideActivityArea(transform.position))
             {
                 EnterReturnState();
                 return;
             }
 
-            // 脱战条件 5：玩家跑出活动区域
             if (!IsInsideActivityArea(player.transform.position))
             {
                 EnterReturnState();
@@ -254,16 +365,31 @@ namespace DarkMazeMinimal
             }
 
             BeginChasingPlayer();
+
+            // 击退后的短暂恢复期，不立刻覆盖 destination
+            if (_isRepelling)
+                return;
+
             MoveToPosition(player.transform.position);
         }
 
         private void UpdateReturn()
         {
-            // Return 状态也可被 lure 打断
             if (TryGetNearestLure(out Vector3 lurePos))
             {
-                StopChasingPlayer();
-                MoveToPosition(lurePos);
+                EnterSuspiciousState(lurePos);
+                return;
+            }
+
+            if (CanStartChase())
+            {
+                EnterChaseState();
+                return;
+            }
+
+            if (CanStartSuspicious(out Vector3 suspiciousPos))
+            {
+                EnterSuspiciousState(suspiciousPos);
                 return;
             }
 
@@ -273,22 +399,32 @@ namespace DarkMazeMinimal
             }
         }
 
-        // =========================
-        // Core Checks
-        // =========================
-
         private bool CanStartChase()
         {
             if (player == null) return false;
             if (player.IsDead) return false;
             if (player.IsInSafeZone) return false;
-
-            // 玩家必须在活动区域里
-            if (!IsInsideActivityArea(player.transform.position))
-                return false;
+            if (!IsInsideActivityArea(player.transform.position)) return false;
 
             float dist = Vector3.Distance(transform.position, player.transform.position);
             return dist <= detectRange;
+        }
+
+        private bool CanStartSuspicious(out Vector3 suspiciousPos)
+        {
+            suspiciousPos = default;
+
+            if (player == null) return false;
+            if (player.IsDead) return false;
+            if (player.IsInSafeZone) return false;
+            if (!IsInsideActivityArea(player.transform.position)) return false;
+
+            float dist = Vector3.Distance(transform.position, player.transform.position);
+            if (dist > suspiciousRange) return false;
+            if (dist <= detectRange) return false;
+
+            suspiciousPos = player.transform.position;
+            return true;
         }
 
         private bool IsInsideActivityArea(Vector3 worldPos)
@@ -327,10 +463,6 @@ namespace DarkMazeMinimal
             return true;
         }
 
-        // =========================
-        // Chase Tracker
-        // =========================
-
         private void BeginChasingPlayer()
         {
             if (_isCurrentlyChasingPlayer) return;
@@ -350,10 +482,6 @@ namespace DarkMazeMinimal
             if (_chaseTracker != null)
                 _chaseTracker.UnregisterChaser(this);
         }
-
-        // =========================
-        // Movement Helpers
-        // =========================
 
         private void MoveToPatrolPoint(int index)
         {
@@ -393,64 +521,69 @@ namespace DarkMazeMinimal
             return nearest != null ? nearest : homePoint;
         }
 
-        // =========================
-        // Gizmos
-        // =========================
+        public bool TryRepelFrom(Vector3 sourcePosition)
+        {
+            if (_state != EnemyState.Chase)
+                return false;
+
+            Vector3 away = transform.position - sourcePosition;
+            away.y = 0f;
+
+            if (away.sqrMagnitude < 0.001f)
+                away = -transform.forward;
+
+            away.Normalize();
+
+            Vector3 rawTarget = transform.position + away * hitBackDistance;
+
+            if (NavMesh.SamplePosition(rawTarget, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+            {
+                _isRepelling = true;
+                _hitRecoverTimer = hitRecoverTime;
+
+                _agent.isStopped = false;
+                _agent.SetDestination(hit.position);
+
+                Debug.Log($"[EnemyChaser] Repelled | {name} | hitBackDistance={hitBackDistance} | target={hit.position}", this);
+                return true;
+            }
+
+            Debug.Log($"[EnemyChaser] Repel failed to find navmesh point | {name}", this);
+            return false;
+        }
+
+        private void RefreshAlertMark()
+        {
+            if (alertMark == null) return;
+            alertMark.SetVisible(_state == EnemyState.Suspicious);
+        }
 
         private void OnDrawGizmosSelected()
         {
-            // Detect Range
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, detectRange);
 
-            // Lose Target Range
+            Gizmos.color = new Color(1f, 0.8f, 0f, 1f);
+            Gizmos.DrawWireSphere(transform.position, suspiciousRange);
+
             Gizmos.color = new Color(1f, 0.5f, 0f, 1f);
             Gizmos.DrawWireSphere(transform.position, loseTargetRange);
 
-            // Lure Detection Range
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireSphere(transform.position, lureMaxConsiderDistance);
 
-            // Activity Area
             if (activityCenter != null)
             {
                 Gizmos.color = Color.cyan;
                 Gizmos.DrawWireSphere(activityCenter.position, activityRadius);
             }
 
-            // Home Point
             if (homePoint != null)
             {
                 Gizmos.color = Color.white;
                 Gizmos.DrawSphere(homePoint.position, 0.25f);
                 Gizmos.DrawLine(transform.position, homePoint.position);
             }
-
-            // Patrol Path
-            if (patrolPoints != null && patrolPoints.Length > 0)
-            {
-                Gizmos.color = Color.green;
-
-                for (int i = 0; i < patrolPoints.Length; i++)
-                {
-                    if (patrolPoints[i] == null) continue;
-
-                    Gizmos.DrawSphere(patrolPoints[i].position, 0.2f);
-
-                    Transform next = patrolPoints[(i + 1) % patrolPoints.Length];
-                    if (next != null)
-                    {
-                        Gizmos.DrawLine(patrolPoints[i].position, next.position);
-                    }
-                }
-            }
-
-#if UNITY_EDITOR
-            UnityEditor.Handles.Label(
-                transform.position + Vector3.up * 2f,
-                $"State: {_state} | Chasing: {_isCurrentlyChasingPlayer}"
-            );
-#endif
         }
     }
 }

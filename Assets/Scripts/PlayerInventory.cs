@@ -22,16 +22,45 @@ namespace DarkMazeItems
 
         [SerializeField] private List<Slot> slots = new List<Slot>();
 
-        int currentIndex = 0;
+        [SerializeField] private int currentIndex = 0;
 
         public PlayerEquipment equipment;
 
+        private StarterAssetsInputs _inputs;
+
         public IReadOnlyList<Slot> Slots => slots;
         public int SlotCount => slots.Count;
+        public int CurrentIndex => currentIndex;
 
-        public Slot currentSlot => slots[currentIndex];
+        public Slot currentSlot
+        {
+            get
+            {
+                if (slots == null || slots.Count == 0)
+                    return null;
 
-        private StarterAssetsInputs _inputs;
+                if (currentIndex < 0 || currentIndex >= slots.Count)
+                    currentIndex = 0;
+
+                return slots[currentIndex];
+            }
+        }
+
+        private void Awake()
+        {
+            _inputs = GetComponent<StarterAssetsInputs>();
+        }
+
+        private void Update()
+        {
+            if (_inputs == null) return;
+
+            if (_inputs.switchEquipment)
+            {
+                _inputs.switchEquipment = false;
+                TrySwitchEquipmentItem();
+            }
+        }
 
         public bool Has(ItemData item, int amount = 1)
         {
@@ -39,22 +68,22 @@ namespace DarkMazeItems
 
             foreach (var s in slots)
             {
-                if (s.item == item && s.count >= amount)
+                if (s != null && s.item == item && s.count >= amount)
                     return true;
             }
 
             return false;
         }
+
         public bool TryAdd(ItemData item, int amount)
         {
             if (item == null || amount <= 0) return false;
 
-            // Try stack first
             if (item.maxStack > 1)
             {
                 foreach (var s in slots)
                 {
-                    if (s.item == item && s.count < item.maxStack)
+                    if (s != null && s.item == item && s.count < item.maxStack)
                     {
                         int canAdd = Mathf.Min(amount, item.maxStack - s.count);
                         s.count += canAdd;
@@ -63,13 +92,14 @@ namespace DarkMazeItems
                         if (amount <= 0)
                         {
                             Debug.Log($"[Inventory] Added {item.displayName}. Now: {s.count}");
+                            EnsureValidCurrentIndex();
+                            SyncHeldItemToCurrentSlot();
                             return true;
                         }
                     }
                 }
             }
 
-            // Add to new slots
             while (amount > 0)
             {
                 if (slots.Count >= maxSlots)
@@ -78,15 +108,21 @@ namespace DarkMazeItems
                     return false;
                 }
 
-                int add = Mathf.Min(amount, item.maxStack);
+                int add = Mathf.Min(amount, Mathf.Max(1, item.maxStack));
                 slots.Add(new Slot { item = item, count = add });
                 amount -= add;
 
                 Debug.Log($"[Inventory] Added {item.displayName} x{add}. Slots: {slots.Count}/{maxSlots}");
             }
 
+            EnsureValidCurrentIndex();
+
+            if (slots.Count == 1 && equipment != null && equipment.HeldItem == null)
+                SyncHeldItemToCurrentSlot();
+
             return true;
         }
+
         public bool TryRemove(ItemData item, int amount)
         {
             if (item == null || amount <= 0) return false;
@@ -94,7 +130,7 @@ namespace DarkMazeItems
             for (int i = slots.Count - 1; i >= 0; i--)
             {
                 var s = slots[i];
-                if (s.item != item) continue;
+                if (s == null || s.item != item) continue;
 
                 int take = Mathf.Min(amount, s.count);
                 s.count -= take;
@@ -106,91 +142,120 @@ namespace DarkMazeItems
                 if (amount <= 0)
                 {
                     Debug.Log($"[Inventory] Removed {item.displayName}");
+                    EnsureValidCurrentIndex();
+                    SyncHeldItemToCurrentSlot();
                     return true;
                 }
             }
 
             return false;
         }
+
         public void TryRemoveCurrent()
         {
+            if (slots == null || slots.Count == 0) return;
+            if (currentIndex < 0 || currentIndex >= slots.Count) return;
+
             slots.RemoveAt(currentIndex);
+            EnsureValidCurrentIndex();
+            SyncHeldItemToCurrentSlot();
         }
+
         public bool TryGetCurrentItem(int amount, ItemData targetItem)
         {
             if (amount <= 0) return false;
 
-            if (SlotCount <= 0)
-                return false;
-            else if(currentSlot.item != targetItem)
+            var slot = currentSlot;
+            if (slot == null) return false;
+            if (slot.item != targetItem) return false;
+            if (slot.count < amount) return false;
+
+            slot.count -= amount;
+            Debug.Log($"[Inventory] Removed {slot.item.displayName} x{amount}");
+
+            if (slot.count <= 0)
             {
-                return false;
+                slots.RemoveAt(currentIndex);
+                EnsureValidCurrentIndex();
+                SyncHeldItemToCurrentSlot();
             }
-            else
-            {
-                Debug.Log($"[Inventory] Removed {currentSlot.item.displayName}");
-                currentSlot.count--;
-                return true;
-            }
+
+            return true;
         }
+
         private void TrySwitchEquipmentItem()
         {
-            // special circ...
-            if(SlotCount == 0 || SlotCount == 1)
-            {
+            if (SlotCount <= 1)
                 return;
-            }
 
-            // deal the change logic
-            if(currentIndex == SlotCount - 1)
-            {
+            currentIndex++;
+            if (currentIndex >= SlotCount)
                 currentIndex = 0;
-            }
-            else
-            {
-                currentIndex += 1;
-            }
 
-            equipment.Hold(slots[currentIndex].item);
+            SyncHeldItemToCurrentSlot();
         }
+
         public void UpdateCurrentSlot()
         {
-            // special circ...
-            if (SlotCount == 0)
-            {
-                equipment.Hold(null);
-                return;
-            }
-            else
-            {
-                equipment.Hold(slots[0].item);
-                currentIndex = 0;
-                return;
-            }
+            EnsureValidCurrentIndex();
+            SyncHeldItemToCurrentSlot();
         }
+
         public void EquipItem(ItemData item)
         {
-            equipment.Hold(item);
-            currentIndex = SlotCount - 1;
+            if (item == null)
+            {
+                if (equipment != null)
+                    equipment.Hold(null);
+                return;
+            }
+
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null && slots[i].item == item)
+                {
+                    currentIndex = i;
+                    SyncHeldItemToCurrentSlot();
+                    return;
+                }
+            }
+
+            EnsureValidCurrentIndex();
+            SyncHeldItemToCurrentSlot();
         }
+
         public List<Slot> GetAllSlots()
         {
             return slots;
         }
 
-        private void Awake()
+        private void EnsureValidCurrentIndex()
         {
-            _inputs = GetComponent<StarterAssetsInputs>();
-        }
-        private void Update()
-        {
-            if (_inputs == null) return;
-
-            if (_inputs.switchEquipment)
+            if (slots == null || slots.Count == 0)
             {
-                _inputs.switchEquipment = false; // œ˚∑— ‰»Î
-                TrySwitchEquipmentItem();
+                currentIndex = 0;
+                return;
             }
+
+            if (currentIndex < 0)
+                currentIndex = 0;
+
+            if (currentIndex >= slots.Count)
+                currentIndex = 0;
+        }
+
+        private void SyncHeldItemToCurrentSlot()
+        {
+            if (equipment == null) return;
+
+            var slot = currentSlot;
+            if (slot == null || slot.item == null)
+            {
+                equipment.Hold(null);
+                return;
+            }
+
+            equipment.Hold(slot.item);
         }
     }
 }

@@ -14,9 +14,10 @@ namespace StarterAssets
         public bool sprint;
 
         [Header("Interaction")]
-        public bool interact;     // 篝火交互
-        public bool throwItem;    // 投掷石子
-        public bool switchEquipment; // 
+        public bool interact;
+        public bool throwItem;
+        public bool switchEquipment;
+        public bool attack;
 
         [Header("Movement Settings")]
         public bool analogMovement;
@@ -52,15 +53,23 @@ namespace StarterAssets
             if (value.isPressed)
                 interact = true;
         }
+
         public void OnSwitchEquipment(InputValue value)
         {
             if (value.isPressed)
                 switchEquipment = true;
         }
+
         public void OnThrow(InputValue value)
         {
             if (value.isPressed)
                 throwItem = true;
+        }
+
+        public void OnAttack(InputValue value)
+        {
+            if (value.isPressed)
+                attack = true;
         }
 #endif
 
@@ -95,4 +104,3 @@ namespace StarterAssets
         }
     }
 }
-
