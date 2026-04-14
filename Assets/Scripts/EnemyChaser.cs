@@ -19,6 +19,7 @@ namespace DarkMazeMinimal
         [SerializeField] private Transform homePoint;
         [SerializeField] private Transform activityCenter;
         [SerializeField] private EnemyAlertMark alertMark;
+        [SerializeField] private Animator animator;
 
         [Header("Patrol")]
         [SerializeField] private Transform[] patrolPoints;
@@ -44,6 +45,15 @@ namespace DarkMazeMinimal
         [Header("Hit Reaction")]
         [SerializeField] private float hitBackDistance = 1.2f;
         [SerializeField] private float hitRecoverTime = 0.25f;
+        [SerializeField] private bool triggerHitAnimation = true;
+
+        [Header("Animation")]
+        [SerializeField] private string stateParamName = "State";
+        [SerializeField] private string speedParamName = "Speed";
+        [SerializeField] private string hitTriggerName = "Hit";
+        [SerializeField] private float speedDampTime = 0.08f;
+        [SerializeField] private float maxAnimationSpeed = 6f;
+        [SerializeField] private float idleSpeedThreshold = 0.05f;
 
         [Header("Update")]
         [SerializeField] private float updateRate = 0.1f;
@@ -65,15 +75,28 @@ namespace DarkMazeMinimal
         private PlayerChaseTracker _chaseTracker;
         private bool _isCurrentlyChasingPlayer = false;
 
-        // 新增：击退保护窗口，避免刚击退就立刻被 Chase 覆盖 destination
+        // 击退保护窗口，避免刚击退就立刻被 Chase 覆盖 destination
         private bool _isRepelling = false;
+
+        // Animator hashes
+        private int _stateHash;
+        private int _speedHash;
+        private int _hitHash;
 
         public bool IsChasingPlayer => _isCurrentlyChasingPlayer;
         public bool IsSuspicious => _state == EnemyState.Suspicious;
+        public bool HasPatrolPoints => patrolPoints != null && patrolPoints.Length > 0;
 
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
+
+            if (animator == null)
+                animator = GetComponentInChildren<Animator>();
+
+            _stateHash = Animator.StringToHash(stateParamName);
+            _speedHash = Animator.StringToHash(speedParamName);
+            _hitHash = Animator.StringToHash(hitTriggerName);
         }
 
         private void Start()
@@ -98,19 +121,26 @@ namespace DarkMazeMinimal
                 Debug.LogWarning($"[EnemyChaser] activityCenter is NULL on {name}", this);
 
             if (patrolPoints == null || patrolPoints.Length == 0)
-                Debug.LogWarning($"[EnemyChaser] No patrol points assigned on {name}", this);
+                Debug.Log($"[EnemyChaser] No patrol points assigned on {name}. This enemy will idle at home in Patrol state.", this);
 
             if (alertMark == null)
                 alertMark = GetComponentInChildren<EnemyAlertMark>(true);
 
+            if (animator == null)
+                Debug.LogWarning($"[EnemyChaser] Animator not found on {name}. Animation sync will be skipped.", this);
+
             RefreshAlertMark();
             EnterPatrolState();
+            UpdateAnimator(true);
         }
 
         private void Update()
         {
             if (player == null || homePoint == null || activityCenter == null)
+            {
+                UpdateAnimator(false);
                 return;
+            }
 
             if (_hitRecoverTimer > 0f)
             {
@@ -124,29 +154,33 @@ namespace DarkMazeMinimal
             }
 
             _updateTimer += Time.deltaTime;
-            if (_updateTimer < updateRate) return;
-            _updateTimer = 0f;
-
-            switch (_state)
+            if (_updateTimer >= updateRate)
             {
-                case EnemyState.Patrol:
-                    UpdatePatrol();
-                    break;
+                _updateTimer = 0f;
 
-                case EnemyState.Suspicious:
-                    UpdateSuspicious();
-                    break;
+                switch (_state)
+                {
+                    case EnemyState.Patrol:
+                        UpdatePatrol();
+                        break;
 
-                case EnemyState.Chase:
-                    UpdateChase();
-                    break;
+                    case EnemyState.Suspicious:
+                        UpdateSuspicious();
+                        break;
 
-                case EnemyState.Return:
-                    UpdateReturn();
-                    break;
+                    case EnemyState.Chase:
+                        UpdateChase();
+                        break;
+
+                    case EnemyState.Return:
+                        UpdateReturn();
+                        break;
+                }
+
+                RefreshAlertMark();
             }
 
-            RefreshAlertMark();
+            UpdateAnimator(false);
         }
 
         private void OnDisable()
@@ -171,12 +205,13 @@ namespace DarkMazeMinimal
 
             StopChasingPlayer();
 
-            if (patrolPoints != null && patrolPoints.Length > 0)
+            if (HasPatrolPoints)
                 MoveToPatrolPoint(_currentPatrolIndex);
             else
-                MoveToPosition(homePoint.position);
+                MoveToHomePoint();
 
             RefreshAlertMark();
+            UpdateAnimator(true);
             Debug.Log($"[EnemyChaser] Enter PATROL | {name}", this);
         }
 
@@ -195,6 +230,7 @@ namespace DarkMazeMinimal
             MoveToPosition(_suspiciousTarget);
 
             RefreshAlertMark();
+            UpdateAnimator(true);
             Debug.Log($"[EnemyChaser] Enter SUSPICIOUS | {name}", this);
         }
 
@@ -207,6 +243,7 @@ namespace DarkMazeMinimal
             BeginChasingPlayer();
 
             RefreshAlertMark();
+            UpdateAnimator(true);
             Debug.Log($"[EnemyChaser] Enter CHASE | {name}", this);
         }
 
@@ -221,13 +258,21 @@ namespace DarkMazeMinimal
 
             StopChasingPlayer();
 
-            Transform target = GetNearestPatrolPoint();
-            if (target != null)
-                MoveToPosition(target.position);
+            if (HasPatrolPoints)
+            {
+                Transform target = GetNearestPatrolPoint();
+                if (target != null)
+                    MoveToPosition(target.position);
+                else
+                    MoveToHomePoint();
+            }
             else
-                MoveToPosition(homePoint.position);
+            {
+                MoveToHomePoint();
+            }
 
             RefreshAlertMark();
+            UpdateAnimator(true);
             Debug.Log($"[EnemyChaser] Enter RETURN | {name}", this);
         }
 
@@ -251,9 +296,9 @@ namespace DarkMazeMinimal
                 return;
             }
 
-            if (patrolPoints == null || patrolPoints.Length == 0)
+            if (!HasPatrolPoints)
             {
-                MoveToPosition(homePoint.position);
+                HoldAtHomePoint();
                 return;
             }
 
@@ -366,7 +411,6 @@ namespace DarkMazeMinimal
 
             BeginChasingPlayer();
 
-            // 击退后的短暂恢复期，不立刻覆盖 destination
             if (_isRepelling)
                 return;
 
@@ -390,6 +434,16 @@ namespace DarkMazeMinimal
             if (CanStartSuspicious(out Vector3 suspiciousPos))
             {
                 EnterSuspiciousState(suspiciousPos);
+                return;
+            }
+
+            if (!HasPatrolPoints)
+            {
+                if (IsNearHomePoint())
+                    EnterPatrolState();
+                else
+                    MoveToHomePoint();
+
                 return;
             }
 
@@ -485,11 +539,38 @@ namespace DarkMazeMinimal
 
         private void MoveToPatrolPoint(int index)
         {
-            if (patrolPoints == null || patrolPoints.Length == 0) return;
+            if (!HasPatrolPoints) return;
             if (index < 0 || index >= patrolPoints.Length) return;
             if (patrolPoints[index] == null) return;
 
             MoveToPosition(patrolPoints[index].position);
+        }
+
+        private void MoveToHomePoint()
+        {
+            if (homePoint == null) return;
+            MoveToPosition(homePoint.position);
+        }
+
+        private void HoldAtHomePoint()
+        {
+            if (homePoint == null) return;
+
+            float dist = Vector3.Distance(transform.position, homePoint.position);
+            if (dist > patrolPointReachDistance)
+            {
+                MoveToHomePoint();
+            }
+            else
+            {
+                _agent.isStopped = true;
+            }
+        }
+
+        private bool IsNearHomePoint()
+        {
+            if (homePoint == null) return true;
+            return Vector3.Distance(transform.position, homePoint.position) <= patrolPointReachDistance;
         }
 
         private void MoveToPosition(Vector3 targetPos)
@@ -503,7 +584,7 @@ namespace DarkMazeMinimal
             Transform nearest = null;
             float best = float.MaxValue;
 
-            if (patrolPoints == null || patrolPoints.Length == 0)
+            if (!HasPatrolPoints)
                 return homePoint;
 
             for (int i = 0; i < patrolPoints.Length; i++)
@@ -541,6 +622,9 @@ namespace DarkMazeMinimal
                 _isRepelling = true;
                 _hitRecoverTimer = hitRecoverTime;
 
+                if (triggerHitAnimation && animator != null)
+                    animator.SetTrigger(_hitHash);
+
                 _agent.isStopped = false;
                 _agent.SetDestination(hit.position);
 
@@ -556,6 +640,25 @@ namespace DarkMazeMinimal
         {
             if (alertMark == null) return;
             alertMark.SetVisible(_state == EnemyState.Suspicious);
+        }
+
+        private void UpdateAnimator(bool forceInstant)
+        {
+            if (animator == null) return;
+
+            animator.SetInteger(_stateHash, (int)_state);
+
+            float rawSpeed = _agent != null ? _agent.velocity.magnitude : 0f;
+
+            if (rawSpeed < idleSpeedThreshold)
+                rawSpeed = 0f;
+
+            float clampedSpeed = Mathf.Clamp(rawSpeed, 0f, maxAnimationSpeed);
+
+            if (forceInstant)
+                animator.SetFloat(_speedHash, clampedSpeed);
+            else
+                animator.SetFloat(_speedHash, clampedSpeed, speedDampTime, Time.deltaTime);
         }
 
         private void OnDrawGizmosSelected()

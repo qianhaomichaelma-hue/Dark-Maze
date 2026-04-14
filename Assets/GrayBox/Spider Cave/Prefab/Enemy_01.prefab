@@ -764,6 +764,7 @@ MonoBehaviour:
   homePoint: {fileID: 0}
   activityCenter: {fileID: 0}
   alertMark: {fileID: 878792519312991531}
+  animator: {fileID: 9133006088509958513}
   patrolPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -779,6 +780,12 @@ MonoBehaviour:
   lureMaxConsiderDistance: 13.1
   hitBackDistance: 1.2
   hitRecoverTime: 0.25
+  triggerHitAnimation: 1
+  stateParamName: State
+  speedParamName: Speed
+  hitTriggerName: Hit
+  speedDampTime: 0.08
+  maxAnimationSpeed: 6
   updateRate: 0.1
 --- !u!1001 &4966474182040679714
 PrefabInstance:
