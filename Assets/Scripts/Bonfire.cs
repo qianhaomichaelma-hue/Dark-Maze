@@ -44,13 +44,14 @@ namespace DarkMazeMinimal
 
             if (isLit)
             {
-                Debug.Log($"[Bonfire] Already lit, ignore | name={name}", this);
                 return false;
             }
 
             isLit = true;
-            // ignite at the same time light up the camp fire
+            // ignite at the same time light up the camp fire and also set the player state to safe
             fireLit.enabled = true;
+            GameManager.Instance.GetPlayerState().SetSafeZone(true);
+
             Debug.Log($"[Bonfire] Ignited SUCCESS | name={name} | frame={Time.frameCount}", this);
 
             if (GameManager.Instance != null && respawnAnchor != null)

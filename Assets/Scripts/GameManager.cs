@@ -32,6 +32,11 @@ namespace DarkMazeMinimal
             player = p;
         }
 
+        public PlayerState GetPlayerState()
+        {
+            return player;
+        }
+
         public void SetRespawnPoint(Transform point)
         {
             if (point == null) return;
