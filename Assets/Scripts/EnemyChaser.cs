@@ -59,7 +59,7 @@ namespace DarkMazeMinimal
         [SerializeField] private float updateRate = 0.1f;
 
         private NavMeshAgent _agent;
-        private EnemyState _state = EnemyState.Patrol;
+        [SerializeField] private EnemyState _state = EnemyState.Patrol;
 
         private int _currentPatrolIndex = 0;
         private float _waitTimer = 0f;
@@ -332,7 +332,7 @@ namespace DarkMazeMinimal
                 return;
             }
 
-            if (player.IsDead || player.IsInSafeZone || !IsInsideActivityArea(player.transform.position))
+            if (player.IsDead || !IsInsideActivityArea(player.transform.position))
             {
                 EnterReturnState();
                 return;
