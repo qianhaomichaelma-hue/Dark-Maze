@@ -20,6 +20,9 @@ namespace DarkMazePlayer
         [SerializeField] private LayerMask enemyLayers = ~0;
         [SerializeField] private float cooldown = 5f;
 
+        [Header("Visual")]
+        [SerializeField] private PlayerTorchVisual torchVisual;
+
         [Header("Debug")]
         [SerializeField] private bool drawDebug = true;
         [SerializeField] private int debugSegments = 6;
@@ -40,6 +43,9 @@ namespace DarkMazePlayer
             _equipment = GetComponent<PlayerEquipment>();
             _state = GetComponent<PlayerState>();
             _cam = Camera.main;
+
+            if (torchVisual == null)
+                torchVisual = GetComponent<PlayerTorchVisual>();
 
             if (attackOrigin == null)
                 attackOrigin = transform;
@@ -74,12 +80,21 @@ namespace DarkMazePlayer
                 return;
             }
 
+            // 攻击允许后，播放手持火把的挥舞表现
+            if (torchVisual != null)
+                torchVisual.PlaySwing();
+
             if (_cam == null)
                 _cam = Camera.main;
 
-            Vector3 origin = attackOrigin != null ? attackOrigin.position : transform.position + Vector3.up;
+            Vector3 origin = attackOrigin != null
+                ? attackOrigin.position
+                : transform.position + Vector3.up;
 
-            Vector3 forward = _cam != null ? _cam.transform.forward : transform.forward;
+            Vector3 forward = _cam != null
+                ? _cam.transform.forward
+                : transform.forward;
+
             forward.y = 0f;
 
             if (forward.sqrMagnitude < 0.0001f)

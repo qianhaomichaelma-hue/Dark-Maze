@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using DarkMazeItems;
+using DarkMazeMinimal;
 using StarterAssets;
-using DarkMazeItems;
+using UnityEngine;
 
 namespace DarkMazePlayer
 {
@@ -8,23 +9,25 @@ namespace DarkMazePlayer
     public class PlayerThrower : MonoBehaviour
     {
         [Header("Throw Setup")]
-        public Transform throwOrigin;
-        public GameObject stonePrefab;
-        public float throwForce = 10f;
-        public float upwardForce = 1.5f;
+        [SerializeField] private Transform throwOrigin;
+        [SerializeField] private GameObject stonePrefab;
+        [SerializeField] private float throwForce = 10f;
+        [SerializeField] private float upwardForce = 1.5f;
 
         [Header("Inventory Cost")]
-        public ItemData stoneItem;
+        [SerializeField] private ItemData stoneItem;
 
         private Camera _cam;
         private StarterAssetsInputs _inputs;
         private PlayerInventory _inventory;
+        private PlayerState _state;
 
         private void Awake()
         {
             _cam = Camera.main;
             _inputs = GetComponent<StarterAssetsInputs>();
             _inventory = GetComponent<PlayerInventory>();
+            _state = GetComponent<PlayerState>();
 
             if (throwOrigin == null)
             {
@@ -38,49 +41,71 @@ namespace DarkMazePlayer
         private void Update()
         {
             if (_inputs == null) return;
+            if (_state != null && _state.IsDead) return;
 
             if (_inputs.throwItem)
             {
-                _inputs.throwItem = false; // 消费输入
+                _inputs.throwItem = false;
                 TryThrow();
             }
         }
 
-        private void TryThrow() // stone
+        private void TryThrow()
         {
-            if (_cam == null) _cam = Camera.main;
-            if (_cam == null) return;
+            if (_cam == null)
+                _cam = Camera.main;
 
-            if (_inventory == null || stoneItem == null || stonePrefab == null)
-                return;
-
-
-            // 消耗 1 个当前物品
-            if (!_inventory.TryGetCurrentItem(1, stoneItem))
+            if (_cam == null)
             {
-                Debug.Log("[PlayerThrower] No stone available.");
+                Debug.LogWarning("[PlayerThrower] No main camera found.", this);
                 return;
             }
 
-            // stone
-            Vector3 origin = throwOrigin.position;
-            Vector3 dir = _cam.transform.forward;
+            if (_inventory == null)
+            {
+                Debug.LogWarning("[PlayerThrower] No PlayerInventory found.", this);
+                return;
+            }
+
+            if (stoneItem == null)
+            {
+                Debug.LogWarning("[PlayerThrower] stoneItem is NULL.", this);
+                return;
+            }
+
+            if (stonePrefab == null)
+            {
+                Debug.LogWarning("[PlayerThrower] stonePrefab is NULL.", this);
+                return;
+            }
+
+            // 只允许消耗当前手持 / 当前选中 slot 的 stone。
+            // TryGetCurrentItem 内部已经负责扣数量、移除空 slot、同步 PlayerEquipment。
+            if (!_inventory.TryGetCurrentItem(1, stoneItem))
+            {
+                Debug.Log("[PlayerThrower] No stone available in current slot.");
+                return;
+            }
+
+            Vector3 origin = throwOrigin != null
+                ? throwOrigin.position
+                : transform.position + Vector3.up * 1.2f + transform.forward * 0.4f;
+
+            Vector3 dir = _cam.transform.forward.normalized;
 
             GameObject stone = Instantiate(stonePrefab, origin, Quaternion.identity);
 
-            if (stone.TryGetComponent<Rigidbody>(out var rb))
+            if (stone.TryGetComponent<Rigidbody>(out Rigidbody rb))
             {
-                Vector3 impulse = dir.normalized * throwForce + Vector3.up * upwardForce;
+                Vector3 impulse = dir * throwForce + Vector3.up * upwardForce;
                 rb.AddForce(impulse, ForceMode.Impulse);
             }
-            Debug.Log("[PlayerThrower] Stone thrown.");
-            // update inventory if we need
-            if(_inventory.currentSlot.count == 0)
+            else
             {
-                _inventory.TryRemoveCurrent();
-                _inventory.UpdateCurrentSlot();
+                Debug.LogWarning("[PlayerThrower] Spawned stone has no Rigidbody.", stone);
             }
+
+            Debug.Log("[PlayerThrower] Stone thrown.");
         }
     }
 }
-

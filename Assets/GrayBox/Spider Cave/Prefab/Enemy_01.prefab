@@ -778,15 +778,18 @@ MonoBehaviour:
   suspiciousPointReachDistance: 0.8
   activityRadius: 14.2
   lureMaxConsiderDistance: 13.1
+  lureCanInterruptChase: 0
   hitBackDistance: 1.2
-  hitRecoverTime: 0.25
+  hitRecoverTime: 0.83
   triggerHitAnimation: 1
   stateParamName: State
   speedParamName: Speed
   hitTriggerName: Hit
   speedDampTime: 0.08
   maxAnimationSpeed: 6
+  idleSpeedThreshold: 0.05
   updateRate: 0.1
+  _state: 0
 --- !u!1001 &4966474182040679714
 PrefabInstance:
   m_ObjectHideFlags: 0

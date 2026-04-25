@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using StarterAssets;
 using DarkMazeItems;
 using DarkMazeMinimal;
@@ -9,16 +9,23 @@ namespace DarkMazePlayer
     public class PlayerInteractor : MonoBehaviour
     {
         [Header("Raycast")]
-        public float interactDistance = 3.0f;
-        public LayerMask interactLayers = ~0;
+        [SerializeField] private float interactDistance = 3.0f;
+        [SerializeField] private LayerMask interactLayers = ~0;
 
-        [Header("Requirement")]
-        public ItemData torchItem;
+        [Header("Bonfire Requirement")]
+        [SerializeField] private ItemData torchItem;
+
+        [Header("Debug")]
+        [SerializeField] private bool debugLogs = false;
+        [SerializeField] private bool drawDebugRay = true;
 
         private Camera _cam;
         private PlayerEquipment _equip;
         private PlayerState _state;
         private StarterAssetsInputs _inputs;
+
+        public PlayerState PlayerState => _state;
+        public PlayerEquipment Equipment => _equip;
 
         private void Awake()
         {
@@ -26,19 +33,23 @@ namespace DarkMazePlayer
             _equip = GetComponent<PlayerEquipment>();
             _state = GetComponent<PlayerState>();
             _inputs = GetComponent<StarterAssetsInputs>();
-
-            Debug.Log($"[PlayerInteractor] Awake | cam={(_cam ? _cam.name : "NULL")} | hasEquip={_equip != null} | hasInputs={_inputs != null}", this);
         }
 
         private void Update()
         {
-            if (_inputs == null) return;
+            if (_inputs == null)
+                return;
 
             if (_inputs.interact)
             {
-                Debug.Log($"[PlayerInteractor] Interact pressed | frame={Time.frameCount}", this);
+                _inputs.interact = false;
 
-                _inputs.interact = false; // consume input
+                if (DialogueUI.Instance != null && DialogueUI.Instance.IsOpen)
+                {
+                    DialogueUI.Instance.Advance();
+                    return;
+                }
+
                 TryInteract();
             }
         }
@@ -46,70 +57,99 @@ namespace DarkMazePlayer
         private void TryInteract()
         {
             if (_state != null && _state.IsDead)
-            {
-                Debug.Log("[PlayerInteractor] Player is dead -> ignore interact.", this);
                 return;
-            }
 
-            if (_cam == null) _cam = Camera.main;
+            if (_cam == null)
+                _cam = Camera.main;
+
             if (_cam == null)
             {
-                Debug.LogWarning("[PlayerInteractor] No MainCamera found. Check camera Tag=MainCamera.", this);
+                LogWarning("No MainCamera found. Check camera Tag = MainCamera.");
                 return;
             }
 
             Ray ray = new Ray(_cam.transform.position, _cam.transform.forward);
 
-            Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.yellow, 0.5f);
+            if (drawDebugRay)
+                Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.yellow, 0.35f);
 
-            bool hitSomething = Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayers, QueryTriggerInteraction.Ignore);
-
-            if (!hitSomething)
+            if (!Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayers, QueryTriggerInteraction.Ignore))
             {
-                Debug.Log($"[PlayerInteractor] Raycast NO HIT | dist={interactDistance}", this);
+                Log("No interactable hit.");
                 return;
             }
 
-            Debug.Log($"[PlayerInteractor] Raycast HIT | name={hit.collider.name} | layer={LayerMask.LayerToName(hit.collider.gameObject.layer)} | dist={hit.distance:F2}", hit.collider);
+            IInteractable interactable = GetInteractableFromHit(hit.collider);
+            if (interactable != null)
+            {
+                interactable.Interact(this);
+                return;
+            }
 
+            TryInteractBonfire(hit);
+        }
+
+        private IInteractable GetInteractableFromHit(Collider hitCollider)
+        {
+            if (hitCollider == null)
+                return null;
+
+            MonoBehaviour[] behaviours = hitCollider.GetComponentsInParent<MonoBehaviour>();
+
+            for (int i = 0; i < behaviours.Length; i++)
+            {
+                if (behaviours[i] is IInteractable interactable)
+                    return interactable;
+            }
+
+            return null;
+        }
+
+        private void TryInteractBonfire(RaycastHit hit)
+        {
             Bonfire bonfire = hit.collider.GetComponentInParent<Bonfire>();
             if (bonfire == null)
             {
-                Debug.Log("[PlayerInteractor] Hit object is NOT a Bonfire (no Bonfire in parents).", hit.collider);
+                Log("Hit object has no IInteractable and no Bonfire.");
                 return;
             }
 
-            Debug.Log($"[PlayerInteractor] Found Bonfire -> {bonfire.name} | isLit={bonfire.IsLit}", bonfire);
-
             if (bonfire.IsLit)
             {
-                Debug.Log("[PlayerInteractor] Bonfire already lit -> no action.", bonfire);
+                Log("Bonfire already lit.");
                 return;
             }
 
             if (_equip == null)
             {
-                Debug.LogWarning("[PlayerInteractor] Missing PlayerEquipment on player.", this);
+                LogWarning("Missing PlayerEquipment on player.");
                 return;
             }
 
             if (torchItem == null)
             {
-                Debug.LogWarning("[PlayerInteractor] torchItem not assigned in Inspector.", this);
+                LogWarning("torchItem is not assigned.");
                 return;
             }
-
-            Debug.Log($"[PlayerInteractor] Holding check | holdingTorch={_equip.IsHolding(torchItem)} | heldItem={(_equip.HeldItem ? _equip.HeldItem.displayName : "None")}", this);
 
             if (!_equip.IsHolding(torchItem))
             {
-                Debug.Log("[PlayerInteractor] Need to HOLD torch to ignite.", this);
+                Log("Need to hold torch to ignite bonfire.");
                 return;
             }
 
-            bool ignited = bonfire.TryIgnite();
-            Debug.Log($"[PlayerInteractor] TryIgnite result = {ignited}", bonfire);
+            bonfire.TryIgnite();
+        }
+
+        private void Log(string message)
+        {
+            if (debugLogs)
+                Debug.Log($"[PlayerInteractor] {message}", this);
+        }
+
+        private void LogWarning(string message)
+        {
+            Debug.LogWarning($"[PlayerInteractor] {message}", this);
         }
     }
 }
-
