@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DarkMazeMinimal
 {
@@ -16,10 +16,27 @@ namespace DarkMazeMinimal
         [SerializeField] private string lockedMessage = "Need a Key";
         [SerializeField] private float textDuration = 1.5f;
 
+        [Header("Audio - Door")]
+        [SerializeField] private AudioClip lockedSFX;
+        [SerializeField] private AudioClip openSFX;
+
+        [SerializeField] private float lockedVolume = 0.8f;
+        [SerializeField] private float openVolume = 1.0f;
+
+        [Tooltip("防止玩家反复进出 Trigger 时锁门音效过度重复。")]
+        [SerializeField] private float lockedSFXCooldown = 0.5f;
+
+        [Header("3D Audio Settings")]
+        [SerializeField] private float spatialBlend = 1f;
+        [SerializeField] private float minDistance = 2f;
+        [SerializeField] private float maxDistance = 15f;
+        [SerializeField] private AudioRolloffMode rolloffMode = AudioRolloffMode.Logarithmic;
+
         [Header("Debug")]
         [SerializeField] private bool logDoor = true;
 
         private bool _isOpen = false;
+        private float _lastLockedSFXTime = -999f;
 
         private void OnTriggerEnter(Collider other)
         {
@@ -31,6 +48,8 @@ namespace DarkMazeMinimal
 
             if (!keyHolder.HasKey)
             {
+                PlayLockedSFX();
+
                 if (doorText != null)
                     doorText.Show(lockedMessage, textDuration);
 
@@ -46,7 +65,10 @@ namespace DarkMazeMinimal
         private void OpenDoor()
         {
             if (_isOpen) return;
+
             _isOpen = true;
+
+            PlayOpenSFX();
 
             if (doorText != null)
                 doorText.HideNow();
@@ -69,6 +91,56 @@ namespace DarkMazeMinimal
 
             if (logDoor)
                 Debug.Log("[SimpleKeyDoor] Door opened.", this);
+        }
+
+        private void PlayLockedSFX()
+        {
+            if (lockedSFX == null)
+                return;
+
+            if (Time.time - _lastLockedSFXTime < lockedSFXCooldown)
+                return;
+
+            _lastLockedSFXTime = Time.time;
+
+            PlayClipAtDoorPosition(lockedSFX, lockedVolume, "LockedDoorSFX");
+        }
+
+        private void PlayOpenSFX()
+        {
+            if (openSFX == null)
+                return;
+
+            PlayClipAtDoorPosition(openSFX, openVolume, "OpenDoorSFX");
+        }
+
+        private void PlayClipAtDoorPosition(AudioClip clip, float volume, string objectName)
+        {
+            if (clip == null)
+                return;
+
+            Vector3 soundPosition = doorVisual != null
+                ? doorVisual.position
+                : transform.position;
+
+            GameObject audioObject = new GameObject(objectName);
+            audioObject.transform.position = soundPosition;
+
+            AudioSource source = audioObject.AddComponent<AudioSource>();
+            source.clip = clip;
+            source.volume = volume;
+            source.playOnAwake = false;
+            source.loop = false;
+
+            source.spatialBlend = spatialBlend;
+            source.minDistance = minDistance;
+            source.maxDistance = maxDistance;
+            source.rolloffMode = rolloffMode;
+            source.dopplerLevel = 0f;
+
+            source.Play();
+
+            Destroy(audioObject, clip.length + 0.1f);
         }
     }
 }

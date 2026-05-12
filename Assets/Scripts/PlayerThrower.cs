@@ -17,6 +17,11 @@ namespace DarkMazePlayer
         [Header("Inventory Cost")]
         [SerializeField] private ItemData stoneItem;
 
+        [Header("Audio - Throw")]
+        [SerializeField] private AudioSource throwAudioSource;
+        [SerializeField] private AudioClip throwSFX;
+        [SerializeField] private float throwVolume = 0.8f;
+
         private Camera _cam;
         private StarterAssetsInputs _inputs;
         private PlayerInventory _inventory;
@@ -28,6 +33,15 @@ namespace DarkMazePlayer
             _inputs = GetComponent<StarterAssetsInputs>();
             _inventory = GetComponent<PlayerInventory>();
             _state = GetComponent<PlayerState>();
+
+            if (throwAudioSource == null)
+                throwAudioSource = GetComponent<AudioSource>();
+
+            if (throwAudioSource != null)
+            {
+                throwAudioSource.playOnAwake = false;
+                throwAudioSource.loop = false;
+            }
 
             if (throwOrigin == null)
             {
@@ -105,7 +119,17 @@ namespace DarkMazePlayer
                 Debug.LogWarning("[PlayerThrower] Spawned stone has no Rigidbody.", stone);
             }
 
+            PlayThrowSFX();
+
             Debug.Log("[PlayerThrower] Stone thrown.");
+        }
+
+        private void PlayThrowSFX()
+        {
+            if (throwAudioSource == null || throwSFX == null)
+                return;
+
+            throwAudioSource.PlayOneShot(throwSFX, throwVolume);
         }
     }
 }

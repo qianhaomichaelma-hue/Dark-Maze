@@ -23,6 +23,16 @@ namespace DarkMazeMinimal
         [SerializeField] private float holdTimePerLine = 2.0f;
         [SerializeField] private float finishDelay = 1.0f;
 
+        [Header("Typing Audio")]
+        [SerializeField] private AudioSource typingAudioSource;
+        [SerializeField] private AudioClip typingLoopClip;
+
+        [Range(0f, 1f)]
+        [SerializeField] private float typingAudioVolume = 0.6f;
+
+        [Tooltip("If true, the typing audio loops while text is typing.")]
+        [SerializeField] private bool loopTypingAudio = true;
+
         [Header("Scene Load")]
         [Tooltip("Leave empty if this story should not load another scene.")]
         [SerializeField] private string nextSceneName;
@@ -38,6 +48,11 @@ namespace DarkMazeMinimal
         private bool _skipTypingRequested;
         private bool _isTyping;
 
+        private void Awake()
+        {
+            SetupTypingAudio();
+        }
+
         private void Start()
         {
             if (storyText != null)
@@ -49,11 +64,33 @@ namespace DarkMazeMinimal
             StartSequence();
         }
 
+        private void SetupTypingAudio()
+        {
+            if (typingAudioSource == null)
+            {
+                typingAudioSource = GetComponent<AudioSource>();
+
+                if (typingAudioSource == null)
+                    typingAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            typingAudioSource.playOnAwake = false;
+            typingAudioSource.loop = loopTypingAudio;
+            typingAudioSource.spatialBlend = 0f;
+            typingAudioSource.volume = typingAudioVolume;
+
+            if (typingLoopClip != null)
+                typingAudioSource.clip = typingLoopClip;
+
+            typingAudioSource.Stop();
+        }
+
         public void StartSequence()
         {
             if (_routine != null)
                 StopCoroutine(_routine);
 
+            StopTypingAudio();
             _routine = StartCoroutine(PlaySequence());
         }
 
@@ -94,6 +131,8 @@ namespace DarkMazeMinimal
                 else if (storyText != null)
                     storyText.text = line;
 
+                StopTypingAudio();
+
                 _advanceRequested = false;
 
                 float timer = 0f;
@@ -118,6 +157,8 @@ namespace DarkMazeMinimal
             _isTyping = true;
             storyText.text = "";
 
+            StartTypingAudio();
+
             float delay = 1f / Mathf.Max(1f, charactersPerSecond);
 
             for (int i = 0; i < line.Length; i++)
@@ -134,14 +175,53 @@ namespace DarkMazeMinimal
 
             _isTyping = false;
             _skipTypingRequested = false;
+
+            StopTypingAudio();
+        }
+
+        private void StartTypingAudio()
+        {
+            if (typingAudioSource == null || typingLoopClip == null)
+                return;
+
+            typingAudioSource.volume = typingAudioVolume;
+            typingAudioSource.loop = loopTypingAudio;
+
+            if (typingAudioSource.clip != typingLoopClip)
+                typingAudioSource.clip = typingLoopClip;
+
+            if (!typingAudioSource.isPlaying)
+            {
+                typingAudioSource.Play();
+            }
+            else
+            {
+                typingAudioSource.UnPause();
+            }
+        }
+
+        private void StopTypingAudio()
+        {
+            if (typingAudioSource == null)
+                return;
+
+            if (typingAudioSource.isPlaying)
+                typingAudioSource.Pause();
         }
 
         private IEnumerator FinishSequence()
         {
+            StopTypingAudio();
+
             yield return new WaitForSeconds(finishDelay);
 
             if (!string.IsNullOrWhiteSpace(nextSceneName))
                 SceneManager.LoadScene(nextSceneName);
+        }
+
+        private void OnDisable()
+        {
+            StopTypingAudio();
         }
     }
 }

@@ -23,6 +23,11 @@ namespace DarkMazePlayer
         [Header("Visual")]
         [SerializeField] private PlayerTorchVisual torchVisual;
 
+        [Header("Audio - Torch Swing")]
+        [SerializeField] private AudioSource torchSwingAudioSource;
+        [SerializeField] private AudioClip torchSwingSFX;
+        [SerializeField] private float torchSwingVolume = 0.8f;
+
         [Header("Debug")]
         [SerializeField] private bool drawDebug = true;
         [SerializeField] private int debugSegments = 6;
@@ -49,6 +54,15 @@ namespace DarkMazePlayer
 
             if (attackOrigin == null)
                 attackOrigin = transform;
+
+            if (torchSwingAudioSource == null)
+                torchSwingAudioSource = GetComponent<AudioSource>();
+
+            if (torchSwingAudioSource != null)
+            {
+                torchSwingAudioSource.playOnAwake = false;
+                torchSwingAudioSource.loop = false;
+            }
         }
 
         private void Update()
@@ -83,6 +97,8 @@ namespace DarkMazePlayer
             // 攻击允许后，播放手持火把的挥舞表现
             if (torchVisual != null)
                 torchVisual.PlaySwing();
+
+            PlayTorchSwingSFX();
 
             if (_cam == null)
                 _cam = Camera.main;
@@ -153,6 +169,14 @@ namespace DarkMazePlayer
             Debug.Log(hitAny
                 ? $"[PlayerTorchRepel] Hit {hitEnemies.Count} enemy(s)."
                 : "[PlayerTorchRepel] Attack used, no valid enemy hit.");
+        }
+
+        private void PlayTorchSwingSFX()
+        {
+            if (torchSwingAudioSource == null || torchSwingSFX == null)
+                return;
+
+            torchSwingAudioSource.PlayOneShot(torchSwingSFX, torchSwingVolume);
         }
 
         private void OnDrawGizmosSelected()

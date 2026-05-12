@@ -16,15 +16,38 @@ namespace DarkMazeMinimal
         [SerializeField] private StarterAssetsInputs starterInputs;
         [SerializeField] private CharacterController characterController;
 
+        [Header("Audio - Death")]
+        [SerializeField] private AudioSource deathAudioSource;
+        [SerializeField] private AudioClip deathSFX;
+        [SerializeField] private float deathVolume = 1.0f;
+
         public bool IsInSafeZone => isInSafeZone;
         public bool IsDead => isDead;
 
         private void Awake()
         {
             // Auto-find common components on Starter Assets player
-            if (thirdPersonController == null) thirdPersonController = GetComponent<ThirdPersonController>();
-            if (starterInputs == null) starterInputs = GetComponent<StarterAssetsInputs>();
-            if (characterController == null) characterController = GetComponent<CharacterController>();
+            if (thirdPersonController == null)
+                thirdPersonController = GetComponent<ThirdPersonController>();
+
+            if (starterInputs == null)
+                starterInputs = GetComponent<StarterAssetsInputs>();
+
+            if (characterController == null)
+                characterController = GetComponent<CharacterController>();
+
+            if (deathAudioSource == null)
+                deathAudioSource = GetComponent<AudioSource>();
+
+            if (deathAudioSource != null)
+            {
+                deathAudioSource.playOnAwake = false;
+                deathAudioSource.loop = false;
+
+                // Death sound is player feedback, so 2D is usually more stable.
+                deathAudioSource.spatialBlend = 0f;
+                deathAudioSource.dopplerLevel = 0f;
+            }
 
             // Register into GameManager if exists
             if (GameManager.Instance != null)
@@ -50,20 +73,26 @@ namespace DarkMazeMinimal
         {
             // StackTrace is for debugging; keep it here only while you investigate.
             var stack = new StackTrace();
+
             // Frame 0: GetCaller, Frame 1: SetSafeZone, Frame 2: the caller we want
             if (stack.FrameCount > 2)
             {
                 var method = stack.GetFrame(2).GetMethod();
+
                 if (method != null && method.DeclaringType != null)
                     return $"{method.DeclaringType.Name}.{method.Name}";
             }
+
             return "Unknown";
         }
 
         public void Kill()
         {
             if (isDead) return;
+
             isDead = true;
+
+            PlayDeathSFX();
 
             UnityEngine.Debug.Log($"[PlayerState] Killed | frame={Time.frameCount}", this);
 
@@ -76,8 +105,11 @@ namespace DarkMazeMinimal
                 starterInputs.sprint = false;
             }
 
-            if (thirdPersonController != null) thirdPersonController.enabled = false;
-            if (starterInputs != null) starterInputs.enabled = false;
+            if (thirdPersonController != null)
+                thirdPersonController.enabled = false;
+
+            if (starterInputs != null)
+                starterInputs.enabled = false;
 
             // Ask manager to respawn
             if (GameManager.Instance != null)
@@ -92,23 +124,37 @@ namespace DarkMazeMinimal
 
             UnityEngine.Debug.Log($"[PlayerState] ReviveAt({spawnPoint.name}) | frame={Time.frameCount}", this);
 
-            // Teleport (CharacterController needs to be disabled briefly)
-            if (characterController != null) characterController.enabled = false;
+            // Teleport. CharacterController needs to be disabled briefly.
+            if (characterController != null)
+                characterController.enabled = false;
+
             transform.position = spawnPoint.position;
             transform.rotation = spawnPoint.rotation;
-            if (characterController != null) characterController.enabled = true;
+
+            if (characterController != null)
+                characterController.enabled = true;
 
             // Reset state
             isDead = false;
 
             // IMPORTANT: Don't force safe here.
-            // SafeZone status should come from SafeZone trigger (and bonfire.IsLit check).
+            // SafeZone status should come from SafeZone trigger and bonfire.IsLit check.
             isInSafeZone = false;
 
             // Re-enable movement/input
-            if (starterInputs != null) starterInputs.enabled = true;
-            if (thirdPersonController != null) thirdPersonController.enabled = true;
+            if (starterInputs != null)
+                starterInputs.enabled = true;
+
+            if (thirdPersonController != null)
+                thirdPersonController.enabled = true;
+        }
+
+        private void PlayDeathSFX()
+        {
+            if (deathAudioSource == null || deathSFX == null)
+                return;
+
+            deathAudioSource.PlayOneShot(deathSFX, deathVolume);
         }
     }
 }
-

@@ -256,6 +256,8 @@ MonoBehaviour:
   item: {fileID: 11400000, guid: 4780e60df62b00e47a40b745fac1b702, type: 2}
   amount: 1
   autoHoldOnPickup: 1
+  pickupSFX: {fileID: 8300000, guid: 36eadb6009abb214a90f0a319ea7c337, type: 3}
+  pickupVolume: 0.8
 --- !u!1001 &1299432762380990507
 PrefabInstance:
   m_ObjectHideFlags: 0

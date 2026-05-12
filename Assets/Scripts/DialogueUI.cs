@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using TMPro;
 
@@ -17,6 +17,18 @@ namespace DarkMazeMinimal
 
         [Header("Text")]
         [SerializeField] private string continueMessage = "Press E to continue";
+
+        [Header("Audio")]
+        [SerializeField] private AudioSource audioSource;
+
+        [Tooltip("每进入一句新对话时，从这个列表里随机播放一个音效。")]
+        [SerializeField] private AudioClip[] lineSFXList;
+
+        [Tooltip("玩家按 E 切到下一句时播放。可为空。")]
+        [SerializeField] private AudioClip advanceSFX;
+
+        [SerializeField] private float lineVolume = 0.7f;
+        [SerializeField] private float advanceVolume = 0.5f;
 
         private string _speakerName;
         private string[] _lines;
@@ -40,6 +52,15 @@ namespace DarkMazeMinimal
 
             if (continueText != null)
                 continueText.text = continueMessage;
+
+            if (audioSource == null)
+                audioSource = GetComponent<AudioSource>();
+
+            if (audioSource != null)
+            {
+                audioSource.playOnAwake = false;
+                audioSource.loop = false;
+            }
         }
 
         public void ShowLines(string speakerName, string[] lines, Action onFinished = null)
@@ -71,6 +92,8 @@ namespace DarkMazeMinimal
         {
             if (!IsOpen)
                 return;
+
+            PlayAdvanceSFX();
 
             _index++;
 
@@ -106,6 +129,33 @@ namespace DarkMazeMinimal
 
             if (continueText != null)
                 continueText.text = continueMessage;
+
+            PlayRandomLineSFX();
+        }
+
+        private void PlayRandomLineSFX()
+        {
+            if (audioSource == null)
+                return;
+
+            if (lineSFXList == null || lineSFXList.Length == 0)
+                return;
+
+            int randomIndex = UnityEngine.Random.Range(0, lineSFXList.Length);
+            AudioClip selectedClip = lineSFXList[randomIndex];
+
+            if (selectedClip == null)
+                return;
+
+            audioSource.PlayOneShot(selectedClip, lineVolume);
+        }
+
+        private void PlayAdvanceSFX()
+        {
+            if (audioSource == null || advanceSFX == null)
+                return;
+
+            audioSource.PlayOneShot(advanceSFX, advanceVolume);
         }
     }
 }

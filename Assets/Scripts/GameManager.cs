@@ -1,6 +1,6 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.Playables;
+using StarterAssets;
 
 namespace DarkMazeMinimal
 {
@@ -13,7 +13,14 @@ namespace DarkMazeMinimal
 
         [Header("Respawn")]
         [SerializeField] private Transform currentRespawnPoint;
+
+        [Tooltip("画面完全变黑后，等待多久再复活。")]
         [SerializeField] private float respawnDelay = 0.6f;
+
+        [Header("Death Transition")]
+        [SerializeField] private DeathPostProcessFader deathPostProcessFader;
+        [SerializeField] private bool useDeathTransition = true;
+        [SerializeField] private bool fadeBackAfterRespawn = true;
 
         private bool _respawning;
 
@@ -24,6 +31,7 @@ namespace DarkMazeMinimal
                 Destroy(gameObject);
                 return;
             }
+
             Instance = this;
         }
 
@@ -40,6 +48,7 @@ namespace DarkMazeMinimal
         public void SetRespawnPoint(Transform point)
         {
             if (point == null) return;
+
             currentRespawnPoint = point;
         }
 
@@ -47,6 +56,7 @@ namespace DarkMazeMinimal
         {
             if (_respawning) return;
             if (player == null) return;
+
             if (currentRespawnPoint == null)
             {
                 Debug.LogWarning("[GameManager] No respawn point set yet.");
@@ -60,11 +70,77 @@ namespace DarkMazeMinimal
         {
             _respawning = true;
 
-            yield return new WaitForSeconds(respawnDelay);
+            // 死亡后再次强制锁住输入，并清空当前动作输入
+            LockAndStopPlayerControl();
 
-            player.ReviveAt(currentRespawnPoint);
+            // Post Processing 渐变到黑
+            if (useDeathTransition && deathPostProcessFader != null)
+            {
+                yield return StartCoroutine(deathPostProcessFader.FadeToBlack());
+            }
+
+            // 黑屏后等待一小段时间
+            if (respawnDelay > 0f)
+                yield return new WaitForSeconds(respawnDelay);
+
+            // 复活
+            if (player != null && currentRespawnPoint != null)
+            {
+                player.ReviveAt(currentRespawnPoint);
+            }
+
+            // PlayerState.ReviveAt 会恢复输入，所以这里如果要等画面淡回来，再重新锁一次
+            if (fadeBackAfterRespawn && useDeathTransition && deathPostProcessFader != null)
+            {
+                LockAndStopPlayerControl();
+
+                yield return StartCoroutine(deathPostProcessFader.FadeFromBlack());
+
+                UnlockPlayerControl();
+            }
 
             _respawning = false;
+        }
+
+        private void LockAndStopPlayerControl()
+        {
+            if (player == null) return;
+
+            StarterAssetsInputs inputs = player.GetComponent<StarterAssetsInputs>();
+            ThirdPersonController controller = player.GetComponent<ThirdPersonController>();
+
+            if (inputs != null)
+            {
+                inputs.move = Vector2.zero;
+                inputs.look = Vector2.zero;
+                inputs.jump = false;
+                inputs.sprint = false;
+
+                // 你项目里扩展过的输入
+                inputs.interact = false;
+                inputs.throwItem = false;
+                inputs.switchEquipment = false;
+                inputs.attack = false;
+
+                inputs.enabled = false;
+            }
+
+            if (controller != null)
+                controller.enabled = false;
+        }
+
+        private void UnlockPlayerControl()
+        {
+            if (player == null) return;
+
+            StarterAssetsInputs inputs = player.GetComponent<StarterAssetsInputs>();
+            ThirdPersonController controller = player.GetComponent<ThirdPersonController>();
+
+            if (inputs != null)
+                inputs.enabled = true;
+
+            if (controller != null)
+                controller.enabled = true;
         }
     }
 }

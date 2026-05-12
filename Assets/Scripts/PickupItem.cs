@@ -12,6 +12,10 @@ namespace DarkMazeItems
         [Header("Optional")]
         public bool autoHoldOnPickup = false;
 
+        [Header("Audio")]
+        [SerializeField] private AudioClip pickupSFX;
+        [SerializeField] private float pickupVolume = 0.8f;
+
         private void Reset()
         {
             var col = GetComponent<Collider>();
@@ -29,6 +33,18 @@ namespace DarkMazeItems
                 return;
             }
 
+            if (item == null)
+            {
+                Debug.LogWarning("[PickupItem] ItemData is missing.", this);
+                return;
+            }
+
+            if (amount <= 0)
+            {
+                Debug.LogWarning("[PickupItem] Amount must be greater than 0.", this);
+                return;
+            }
+
             if (inv.TryAdd(item, amount))
             {
                 if (autoHoldOnPickup)
@@ -36,8 +52,18 @@ namespace DarkMazeItems
                     inv.EquipItem(item);
                 }
 
+                PlayPickupSFX();
+
                 Destroy(gameObject);
             }
+        }
+
+        private void PlayPickupSFX()
+        {
+            if (pickupSFX == null)
+                return;
+
+            AudioSource.PlayClipAtPoint(pickupSFX, transform.position, pickupVolume);
         }
     }
 }

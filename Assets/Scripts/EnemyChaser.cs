@@ -63,6 +63,19 @@ namespace DarkMazeMinimal
         [SerializeField] private float maxAnimationSpeed = 6f;
         [SerializeField] private float idleSpeedThreshold = 0.05f;
 
+        [Header("Audio - Enemy Events")]
+        [SerializeField] private AudioSource eventAudioSource;
+
+        [Header("Audio - Player Detected")]
+        [SerializeField] private AudioClip playerDetectedSFX;
+        [SerializeField] private float playerDetectedVolume = 0.9f;
+        [SerializeField] private float detectedSFXCooldown = 1.0f;
+
+        [Header("Audio - Enemy Hit")]
+        [SerializeField] private AudioClip enemyHitSFX;
+        [SerializeField] private float enemyHitVolume = 1.0f;
+        [SerializeField] private float enemyHitSFXCooldown = 0.2f;
+
         [Header("Update")]
         [SerializeField] private float updateRate = 0.1f;
 
@@ -83,7 +96,6 @@ namespace DarkMazeMinimal
         private float _hitRecoverTimer = 0f;
         private bool _isRepelling = false;
 
-        // Hit 状态锁朝向用
         private Quaternion _hitLockedRotation;
         private bool _hasHitLockedRotation = false;
         private bool _defaultAgentUpdateRotation = true;
@@ -94,6 +106,9 @@ namespace DarkMazeMinimal
         private int _stateHash;
         private int _speedHash;
         private int _hitHash;
+
+        private float _lastDetectedSFXTime = -999f;
+        private float _lastEnemyHitSFXTime = -999f;
 
         public bool IsChasingPlayer => _isCurrentlyChasingPlayer;
 
@@ -116,6 +131,16 @@ namespace DarkMazeMinimal
 
             if (animator == null)
                 animator = GetComponentInChildren<Animator>();
+
+            if (eventAudioSource == null)
+                eventAudioSource = GetComponent<AudioSource>();
+
+            if (eventAudioSource != null)
+            {
+                eventAudioSource.playOnAwake = false;
+                eventAudioSource.loop = false;
+                eventAudioSource.dopplerLevel = 0f;
+            }
 
             _stateHash = Animator.StringToHash(stateParamName);
             _speedHash = Animator.StringToHash(speedParamName);
@@ -205,9 +230,6 @@ namespace DarkMazeMinimal
 
         private void LateUpdate()
         {
-            // 关键修正：
-            // Hit 状态期间锁住敌人进入受击瞬间的朝向。
-            // 这样 NavMeshAgent 可以移动敌人，但不会让敌人转身。
             if (_state == EnemyState.Hit && _hasHitLockedRotation)
             {
                 transform.rotation = _hitLockedRotation;
@@ -288,6 +310,8 @@ namespace DarkMazeMinimal
 
             BeginChasingPlayer();
 
+            PlayPlayerDetectedSFX();
+
             RefreshAlertMark();
             UpdateAnimator(true);
 
@@ -303,8 +327,6 @@ namespace DarkMazeMinimal
             _isRepelling = true;
             _hitRecoverTimer = Mathf.Max(0.01f, hitRecoverTime);
 
-            // 关键修正：
-            // 记录受击瞬间的朝向，并关闭 NavMeshAgent 自动旋转。
             _hitLockedRotation = transform.rotation;
             _hasHitLockedRotation = true;
 
@@ -319,9 +341,10 @@ namespace DarkMazeMinimal
                 animator.SetTrigger(_hitHash);
             }
 
+            PlayEnemyHitSFX();
+
             MoveToPosition(repelTarget);
 
-            // SetDestination 之后再锁一次，防止这一帧已经轻微转向。
             transform.rotation = _hitLockedRotation;
 
             RefreshAlertMark();
@@ -504,8 +527,6 @@ namespace DarkMazeMinimal
 
         private void UpdateHit()
         {
-            // Hit 期间只倒计时，不检测玩家、不检测投掷物、不重新追击。
-            // 位移由 NavMeshAgent 执行，但朝向由 LateUpdate 锁住。
             _hitRecoverTimer -= updateRate;
 
             if (_hitRecoverTimer > 0f)
@@ -801,6 +822,32 @@ namespace DarkMazeMinimal
 
             Debug.Log($"[EnemyChaser] Repel failed to find navmesh point | {name}", this);
             return false;
+        }
+
+        private void PlayPlayerDetectedSFX()
+        {
+            if (eventAudioSource == null || playerDetectedSFX == null)
+                return;
+
+            if (Time.time - _lastDetectedSFXTime < detectedSFXCooldown)
+                return;
+
+            _lastDetectedSFXTime = Time.time;
+
+            eventAudioSource.PlayOneShot(playerDetectedSFX, playerDetectedVolume);
+        }
+
+        private void PlayEnemyHitSFX()
+        {
+            if (eventAudioSource == null || enemyHitSFX == null)
+                return;
+
+            if (Time.time - _lastEnemyHitSFXTime < enemyHitSFXCooldown)
+                return;
+
+            _lastEnemyHitSFXTime = Time.time;
+
+            eventAudioSource.PlayOneShot(enemyHitSFX, enemyHitVolume);
         }
 
         private void RefreshAlertMark()

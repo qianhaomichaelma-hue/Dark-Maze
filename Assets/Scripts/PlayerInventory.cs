@@ -26,6 +26,11 @@ namespace DarkMazeItems
 
         public PlayerEquipment equipment;
 
+        [Header("Audio")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip switchEquipmentSFX;
+        [SerializeField] private float switchEquipmentVolume = 0.7f;
+
         private StarterAssetsInputs _inputs;
 
         public IReadOnlyList<Slot> Slots => slots;
@@ -49,6 +54,9 @@ namespace DarkMazeItems
         private void Awake()
         {
             _inputs = GetComponent<StarterAssetsInputs>();
+
+            if (audioSource == null)
+                audioSource = GetComponent<AudioSource>();
         }
 
         private void Update()
@@ -189,10 +197,13 @@ namespace DarkMazeItems
                 return;
 
             currentIndex++;
+
             if (currentIndex >= SlotCount)
                 currentIndex = 0;
 
             SyncHeldItemToCurrentSlot();
+
+            PlaySwitchEquipmentSFX();
         }
 
         public void UpdateCurrentSlot()
@@ -207,6 +218,7 @@ namespace DarkMazeItems
             {
                 if (equipment != null)
                     equipment.Hold(null);
+
                 return;
             }
 
@@ -249,6 +261,7 @@ namespace DarkMazeItems
             if (equipment == null) return;
 
             var slot = currentSlot;
+
             if (slot == null || slot.item == null)
             {
                 equipment.Hold(null);
@@ -256,6 +269,14 @@ namespace DarkMazeItems
             }
 
             equipment.Hold(slot.item);
+        }
+
+        private void PlaySwitchEquipmentSFX()
+        {
+            if (audioSource == null || switchEquipmentSFX == null)
+                return;
+
+            audioSource.PlayOneShot(switchEquipmentSFX, switchEquipmentVolume);
         }
     }
 }
