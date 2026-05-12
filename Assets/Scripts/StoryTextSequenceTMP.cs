@@ -37,31 +37,37 @@ namespace DarkMazeMinimal
         [Tooltip("Leave empty if this story should not load another scene.")]
         [SerializeField] private string nextSceneName;
 
-        [Header("Advance")]
-        [Tooltip("If true, UI Button can call Advance() to skip typing or move to next line.")]
-        [SerializeField] private bool allowManualAdvance = true;
-
-        [SerializeField] private string hintMessage = "Click to continue";
-
         private Coroutine _routine;
-        private bool _advanceRequested;
-        private bool _skipTypingRequested;
-        private bool _isTyping;
 
         private void Awake()
         {
+            ApplyHiddenCursorState();
             SetupTypingAudio();
         }
 
         private void Start()
         {
+            ApplyHiddenCursorState();
+
             if (storyText != null)
                 storyText.text = "";
 
             if (hintText != null)
-                hintText.text = allowManualAdvance ? hintMessage : "";
+                hintText.text = "";
 
             StartSequence();
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus)
+                ApplyHiddenCursorState();
+        }
+
+        private void ApplyHiddenCursorState()
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void SetupTypingAudio()
@@ -94,21 +100,6 @@ namespace DarkMazeMinimal
             _routine = StartCoroutine(PlaySequence());
         }
 
-        public void Advance()
-        {
-            if (!allowManualAdvance)
-                return;
-
-            if (_isTyping)
-            {
-                _skipTypingRequested = true;
-            }
-            else
-            {
-                _advanceRequested = true;
-            }
-        }
-
         private IEnumerator PlaySequence()
         {
             yield return new WaitForSeconds(startDelay);
@@ -123,27 +114,19 @@ namespace DarkMazeMinimal
             {
                 string line = lines[i];
 
-                _advanceRequested = false;
-                _skipTypingRequested = false;
-
                 if (useTypewriter)
+                {
                     yield return TypeLine(line);
+                }
                 else if (storyText != null)
+                {
                     storyText.text = line;
+                }
 
                 StopTypingAudio();
 
-                _advanceRequested = false;
-
-                float timer = 0f;
-                while (timer < holdTimePerLine)
-                {
-                    if (_advanceRequested)
-                        break;
-
-                    timer += Time.deltaTime;
-                    yield return null;
-                }
+                if (holdTimePerLine > 0f)
+                    yield return new WaitForSeconds(holdTimePerLine);
             }
 
             yield return FinishSequence();
@@ -154,7 +137,6 @@ namespace DarkMazeMinimal
             if (storyText == null)
                 yield break;
 
-            _isTyping = true;
             storyText.text = "";
 
             StartTypingAudio();
@@ -163,18 +145,9 @@ namespace DarkMazeMinimal
 
             for (int i = 0; i < line.Length; i++)
             {
-                if (_skipTypingRequested)
-                {
-                    storyText.text = line;
-                    break;
-                }
-
                 storyText.text += line[i];
                 yield return new WaitForSeconds(delay);
             }
-
-            _isTyping = false;
-            _skipTypingRequested = false;
 
             StopTypingAudio();
         }
@@ -213,7 +186,10 @@ namespace DarkMazeMinimal
         {
             StopTypingAudio();
 
-            yield return new WaitForSeconds(finishDelay);
+            if (finishDelay > 0f)
+                yield return new WaitForSeconds(finishDelay);
+
+            ApplyHiddenCursorState();
 
             if (!string.IsNullOrWhiteSpace(nextSceneName))
                 SceneManager.LoadScene(nextSceneName);
