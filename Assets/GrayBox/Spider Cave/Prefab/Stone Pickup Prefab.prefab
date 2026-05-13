@@ -140,6 +140,7 @@ GameObject:
   - component: {fileID: 9201358419786001123}
   - component: {fileID: 2125705149842008780}
   - component: {fileID: 5902933050889034637}
+  - component: {fileID: 2404197862400838115}
   m_Layer: 0
   m_Name: Stone Pickup Prefab
   m_TagString: Untagged
@@ -258,6 +259,28 @@ MonoBehaviour:
   autoHoldOnPickup: 1
   pickupSFX: {fileID: 8300000, guid: 36eadb6009abb214a90f0a319ea7c337, type: 3}
   pickupVolume: 0.8
+--- !u!114 &2404197862400838115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2814592013289445020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e54aab6b259504ea49b03532bad596, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DarkMazeMinimal.PickupAttentionMotion
+  visualTarget: {fileID: 0}
+  rotate: 1
+  rotationSpeed: {x: 0, y: 90, z: 0}
+  floatUpDown: 1
+  floatHeight: 0.2
+  floatSpeed: 2
+  pulseScale: 1
+  pulseAmount: 0.1
+  pulseSpeed: 2
+  useRandomPhase: 1
 --- !u!1001 &1299432762380990507
 PrefabInstance:
   m_ObjectHideFlags: 0
