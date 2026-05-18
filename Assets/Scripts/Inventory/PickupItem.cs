@@ -1,5 +1,6 @@
 using UnityEngine;
 using DarkMazePlayer;
+using DarkMazeUI;
 
 namespace DarkMazeItems
 {
@@ -51,6 +52,9 @@ namespace DarkMazeItems
                 {
                     inv.EquipItem(item);
                 }
+
+                if (ItemGainPopupUI.Instance != null)
+                    ItemGainPopupUI.Instance.ShowItemGain(item.displayName, amount);
 
                 PlayPickupSFX();
 
