@@ -473,11 +473,11 @@ namespace DarkMazeMinimal
                 return;
             }
 
-            if (player.IsInSafeZone)
-            {
-                EnterReturnState();
-                return;
-            }
+            //if (player.IsInSafeZone)
+            //{
+            //    EnterReturnState();
+            //    return;
+            //}
 
             if (!IsInsideActivityArea(transform.position))
             {
