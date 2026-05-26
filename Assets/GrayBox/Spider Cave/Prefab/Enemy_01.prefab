@@ -295,7 +295,7 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 0.2941177, b: 0.3894537, a: 1}
-  m_Intensity: 17.61
+  m_Intensity: 13
   m_Range: 2.73
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -524,8 +524,8 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 0.2941177, b: 0.3894537, a: 1}
-  m_Intensity: 16.4
-  m_Range: 5.58
+  m_Intensity: 10
+  m_Range: 3
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -781,7 +781,9 @@ MonoBehaviour:
   suspiciousPointReachDistance: 0.8
   activityRadius: 14.2
   lureMaxConsiderDistance: 13.1
-  lureCanInterruptChase: 0
+  lureCanInterruptChase: 1
+  ignorePlayerWhileInvestigatingLure: 1
+  lureIgnorePlayerTime: 2.5
   hitBackDistance: 1.2
   hitRecoverTime: 0.83
   triggerHitAnimation: 1

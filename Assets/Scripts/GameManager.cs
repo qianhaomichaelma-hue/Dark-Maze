@@ -83,6 +83,11 @@ namespace DarkMazeMinimal
             if (respawnDelay > 0f)
                 yield return new WaitForSeconds(respawnDelay);
 
+            // 关键：
+            // 玩家死亡只重置 intro 蜘蛛生成器，不触发蜘蛛撤退动画。
+            // 这样玩家复活后再次进入 Spawn Volume 时，教学蜘蛛会重新生成。
+            IntroSpiderSpawner.ResetAllForNewLife();
+
             // 复活
             if (player != null && currentRespawnPoint != null)
             {

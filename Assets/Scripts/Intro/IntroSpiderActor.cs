@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -7,11 +8,15 @@ namespace DarkMazeMinimal
     [DisallowMultipleComponent]
     public class IntroSpiderActor : MonoBehaviour
     {
+        [Header("Destroy Target")]
+        [Tooltip("The whole spider root object that should disappear. If empty, the script will try to use the NavMeshAgent object.")]
+        [SerializeField] private GameObject objectToRemove;
+
         [Header("References")]
         [SerializeField] private NavMeshAgent agent;
         [SerializeField] private Animator animator;
 
-        [Tooltip("Drag EnemyChaser or other AI scripts here. They will be disabled when spider dismisses.")]
+        [Tooltip("Drag EnemyChaser or other AI scripts here. They will be disabled when the spider dismisses.")]
         [SerializeField] private MonoBehaviour[] behavioursToDisableOnDismiss;
 
         [Tooltip("Optional. Drag attack / body colliders here if you want to disable damage when dismissing.")]
@@ -27,49 +32,103 @@ namespace DarkMazeMinimal
         [SerializeField] private string speedFloatName = "Speed";
         [SerializeField] private string walkingBoolName = "IsWalking";
 
+        [Header("Debug")]
+        [SerializeField] private bool debugLogs = false;
+
         private bool isDismissing;
+
+        public bool IsDismissing => isDismissing;
+
+        public event Action<IntroSpiderActor> OnRemoved;
 
         private void Reset()
         {
             agent = GetComponent<NavMeshAgent>();
+
+            if (agent == null)
+                agent = GetComponentInParent<NavMeshAgent>();
+
             animator = GetComponentInChildren<Animator>();
+
+            if (objectToRemove == null)
+            {
+                if (agent != null)
+                    objectToRemove = agent.gameObject;
+                else
+                    objectToRemove = gameObject;
+            }
+        }
+
+        private void Awake()
+        {
+            ResolveReferences();
+        }
+
+        public void SetDestroyOnDismiss(bool destroy)
+        {
+            destroyOnDismiss = destroy;
+        }
+
+        public void ResetForReuse()
+        {
+            StopAllCoroutines();
+
+            isDismissing = false;
+
+            ResolveReferences();
+
+            EnableGameplayBehaviours();
+
+            if (agent != null && agent.enabled && agent.isOnNavMesh)
+            {
+                agent.isStopped = false;
+                agent.ResetPath();
+            }
+
+            SetWalkingAnimation(false);
+
+            Log("ResetForReuse.");
         }
 
         public void Dismiss(Transform exitPoint)
         {
-            if (isDismissing) return;
+            if (isDismissing)
+                return;
+
             StartCoroutine(DismissRoutine(exitPoint));
+        }
+
+        public void ForceRemoveImmediately()
+        {
+            StopAllCoroutines();
+
+            DisableGameplayBehaviours();
+            StopAgent();
+
+            RemoveNow();
+
+            Log("ForceRemoveImmediately.");
         }
 
         private IEnumerator DismissRoutine(Transform exitPoint)
         {
             isDismissing = true;
 
-            // 关闭普通追击 AI，避免它继续追玩家
-            if (behavioursToDisableOnDismiss != null)
-            {
-                foreach (var behaviour in behavioursToDisableOnDismiss)
-                {
-                    if (behaviour != null && behaviour != this)
-                        behaviour.enabled = false;
-                }
-            }
-
-            // 关闭攻击判定，避免玩家已经进安全区还被咬
-            if (collidersToDisableOnDismiss != null)
-            {
-                foreach (var col in collidersToDisableOnDismiss)
-                {
-                    if (col != null)
-                        col.enabled = false;
-                }
-            }
+            // 撤退一旦开始，就彻底关闭正式 AI 和攻击判定。
+            // 这样玩家离开安全区后，蜘蛛不会折返追玩家。
+            DisableGameplayBehaviours();
 
             SetWalkingAnimation(true);
 
             float timer = 0f;
 
-            if (agent != null && agent.enabled && agent.isOnNavMesh && exitPoint != null)
+            bool canUseAgent =
+                agent != null &&
+                agent.enabled &&
+                agent.isOnNavMesh &&
+                exitPoint != null;
+
+            if (canUseAgent)
             {
                 agent.isStopped = false;
                 agent.ResetPath();
@@ -79,30 +138,28 @@ namespace DarkMazeMinimal
                 {
                     timer += Time.deltaTime;
 
-                    if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.15f)
-                        break;
-
                     UpdateSpeedAnimation();
+
                     yield return null;
                 }
 
-                agent.isStopped = true;
-                agent.ResetPath();
+                StopAgent();
             }
             else
             {
-                // 如果没有 NavMeshAgent，就手动朝 exitPoint 或自身反方向走
+                Transform moveTransform = objectToRemove != null ? objectToRemove.transform : transform;
+
                 Vector3 moveDir;
 
                 if (exitPoint != null)
                 {
-                    moveDir = exitPoint.position - transform.position;
+                    moveDir = exitPoint.position - moveTransform.position;
                     moveDir.y = 0f;
                     moveDir.Normalize();
                 }
                 else
                 {
-                    moveDir = -transform.forward;
+                    moveDir = -moveTransform.forward;
                 }
 
                 while (timer < walkAwayTime)
@@ -112,8 +169,8 @@ namespace DarkMazeMinimal
                     if (moveDir.sqrMagnitude > 0.001f)
                     {
                         Quaternion targetRot = Quaternion.LookRotation(moveDir, Vector3.up);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 8f);
-                        transform.position += moveDir * manualWalkSpeed * Time.deltaTime;
+                        moveTransform.rotation = Quaternion.Slerp(moveTransform.rotation, targetRot, Time.deltaTime * 8f);
+                        moveTransform.position += moveDir * manualWalkSpeed * Time.deltaTime;
                     }
 
                     yield return null;
@@ -125,10 +182,99 @@ namespace DarkMazeMinimal
             if (destroyDelay > 0f)
                 yield return new WaitForSeconds(destroyDelay);
 
+            RemoveNow();
+        }
+
+        private void ResolveReferences()
+        {
+            if (agent == null)
+            {
+                agent = GetComponent<NavMeshAgent>();
+
+                if (agent == null)
+                    agent = GetComponentInParent<NavMeshAgent>();
+            }
+
+            if (animator == null)
+                animator = GetComponentInChildren<Animator>();
+
+            if (objectToRemove == null)
+            {
+                if (agent != null)
+                    objectToRemove = agent.gameObject;
+                else
+                    objectToRemove = gameObject;
+            }
+        }
+
+        private void DisableGameplayBehaviours()
+        {
+            if (behavioursToDisableOnDismiss != null)
+            {
+                foreach (var behaviour in behavioursToDisableOnDismiss)
+                {
+                    if (behaviour != null && behaviour != this)
+                        behaviour.enabled = false;
+                }
+            }
+
+            if (collidersToDisableOnDismiss != null)
+            {
+                foreach (var col in collidersToDisableOnDismiss)
+                {
+                    if (col != null)
+                        col.enabled = false;
+                }
+            }
+        }
+
+        private void EnableGameplayBehaviours()
+        {
+            if (behavioursToDisableOnDismiss != null)
+            {
+                foreach (var behaviour in behavioursToDisableOnDismiss)
+                {
+                    if (behaviour != null && behaviour != this)
+                        behaviour.enabled = true;
+                }
+            }
+
+            if (collidersToDisableOnDismiss != null)
+            {
+                foreach (var col in collidersToDisableOnDismiss)
+                {
+                    if (col != null)
+                        col.enabled = true;
+                }
+            }
+        }
+
+        private void StopAgent()
+        {
+            if (agent == null) return;
+            if (!agent.enabled) return;
+            if (!agent.isOnNavMesh) return;
+
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
+
+        private void RemoveNow()
+        {
+            GameObject target = objectToRemove != null ? objectToRemove : gameObject;
+
+            OnRemoved?.Invoke(this);
+
             if (destroyOnDismiss)
-                Destroy(gameObject);
+            {
+                Destroy(target);
+            }
             else
-                gameObject.SetActive(false);
+            {
+                target.SetActive(false);
+            }
+
+            Log($"Removed spider target = {target.name}");
         }
 
         private void SetWalkingAnimation(bool walking)
@@ -162,6 +308,12 @@ namespace DarkMazeMinimal
             }
 
             return false;
+        }
+
+        private void Log(string message)
+        {
+            if (debugLogs)
+                Debug.Log($"[IntroSpiderActor] {message}", this);
         }
     }
 }

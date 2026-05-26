@@ -44,8 +44,14 @@ namespace DarkMazeMinimal
         [Header("Lure")]
         [SerializeField] private float lureMaxConsiderDistance = 25f;
 
-        [Tooltip("If true, a thrown lure can interrupt Chase. If false, lures only work before the enemy has fully started chasing.")]
-        [SerializeField] private bool lureCanInterruptChase = false;
+        [Tooltip("If true, a thrown lure can interrupt Chase.")]
+        [SerializeField] private bool lureCanInterruptChase = true;
+
+        [Tooltip("If true, the enemy temporarily ignores the player while investigating a lure.")]
+        [SerializeField] private bool ignorePlayerWhileInvestigatingLure = true;
+
+        [Tooltip("After being distracted by a lure, how long the enemy ignores player detection.")]
+        [SerializeField] private float lureIgnorePlayerTime = 2.5f;
 
         [Header("Hit Reaction")]
         [SerializeField] private float hitBackDistance = 1.2f;
@@ -109,6 +115,8 @@ namespace DarkMazeMinimal
 
         private float _lastDetectedSFXTime = -999f;
         private float _lastEnemyHitSFXTime = -999f;
+
+        private float _ignorePlayerUntilTime = -999f;
 
         public bool IsChasingPlayer => _isCurrentlyChasingPlayer;
 
@@ -182,6 +190,39 @@ namespace DarkMazeMinimal
             UpdateAnimator(true);
         }
 
+        public void InitializeRuntimeReferences(
+    PlayerState runtimePlayer,
+    Transform runtimeHomePoint,
+    Transform runtimeActivityCenter = null
+)
+        {
+            if (runtimePlayer != null)
+                player = runtimePlayer;
+
+            if (runtimeHomePoint != null)
+                homePoint = runtimeHomePoint;
+
+            if (runtimeActivityCenter != null)
+                activityCenter = runtimeActivityCenter;
+            else if (activityCenter == null)
+                activityCenter = homePoint;
+
+            if (player != null)
+                _chaseTracker = player.GetComponent<PlayerChaseTracker>();
+
+            if (alertMark == null)
+                alertMark = GetComponentInChildren<EnemyAlertMark>(true);
+
+            if (animator == null)
+                animator = GetComponentInChildren<Animator>();
+
+            RefreshAlertMark();
+
+            Debug.Log(
+                $"[EnemyChaser] Runtime references initialized | enemy={name} | player={(player ? player.name : "NULL")} | home={(homePoint ? homePoint.name : "NULL")} | activity={(activityCenter ? activityCenter.name : "NULL")}",
+                this
+            );
+        }
         private void Update()
         {
             if (player == null || homePoint == null || activityCenter == null)
@@ -269,7 +310,7 @@ namespace DarkMazeMinimal
             Debug.Log($"[EnemyChaser] Enter PATROL | {name}", this);
         }
 
-        private void EnterInvestigateLureState(Vector3 lurePos)
+        private void EnterInvestigateLureState(Vector3 lurePos, bool interruptedChase)
         {
             _state = EnemyState.InvestigateLure;
 
@@ -277,12 +318,16 @@ namespace DarkMazeMinimal
             ResetHitData();
 
             StopChasingPlayer();
+
+            if (interruptedChase || ignorePlayerWhileInvestigatingLure)
+                StartIgnoringPlayerBecauseOfLure();
+
             MoveToPosition(_interestTarget);
 
             RefreshAlertMark();
             UpdateAnimator(true);
 
-            Debug.Log($"[EnemyChaser] Enter INVESTIGATE LURE | {name} | target={lurePos}", this);
+            Debug.Log($"[EnemyChaser] Enter INVESTIGATE LURE | {name} | target={lurePos} | interruptedChase={interruptedChase}", this);
         }
 
         private void EnterSuspiciousPlayerState(Vector3 playerLastKnownPos)
@@ -391,7 +436,7 @@ namespace DarkMazeMinimal
 
             if (TryGetNearestLure(out Vector3 lurePos))
             {
-                EnterInvestigateLureState(lurePos);
+                EnterInvestigateLureState(lurePos, false);
                 return;
             }
 
@@ -422,13 +467,13 @@ namespace DarkMazeMinimal
 
         private void UpdateInvestigateLure()
         {
-            if (CanStartChase())
+            if (player.IsDead)
             {
-                EnterChaseState();
+                EnterReturnState();
                 return;
             }
 
-            if (player.IsDead)
+            if (player.IsInSafeZone)
             {
                 EnterReturnState();
                 return;
@@ -440,11 +485,18 @@ namespace DarkMazeMinimal
                 return;
             }
 
+            if (CanStartChase())
+            {
+                EnterChaseState();
+                return;
+            }
+
             if (TryGetNearestLure(out Vector3 lurePos))
             {
                 if ((_interestTarget - lurePos).sqrMagnitude > 0.05f)
                 {
                     SetInterestTarget(lurePos);
+                    StartIgnoringPlayerBecauseOfLure();
                     MoveToPosition(_interestTarget);
                 }
             }
@@ -465,7 +517,7 @@ namespace DarkMazeMinimal
 
             if (TryGetNearestLure(out Vector3 lurePos))
             {
-                EnterInvestigateLureState(lurePos);
+                EnterInvestigateLureState(lurePos, false);
                 return;
             }
 
@@ -483,12 +535,6 @@ namespace DarkMazeMinimal
 
         private void UpdateChase()
         {
-            if (lureCanInterruptChase && TryGetNearestLure(out Vector3 lurePos))
-            {
-                EnterInvestigateLureState(lurePos);
-                return;
-            }
-
             if (player.IsDead)
             {
                 EnterReturnState();
@@ -498,6 +544,12 @@ namespace DarkMazeMinimal
             if (player.IsInSafeZone)
             {
                 EnterReturnState();
+                return;
+            }
+
+            if (lureCanInterruptChase && TryGetNearestLure(out Vector3 lurePos))
+            {
+                EnterInvestigateLureState(lurePos, true);
                 return;
             }
 
@@ -548,7 +600,7 @@ namespace DarkMazeMinimal
 
             if (TryGetNearestLure(out Vector3 lurePos))
             {
-                EnterInvestigateLureState(lurePos);
+                EnterInvestigateLureState(lurePos, false);
                 return;
             }
 
@@ -609,6 +661,8 @@ namespace DarkMazeMinimal
 
         private bool CanStartChase()
         {
+            if (IsIgnoringPlayerBecauseOfLure()) return false;
+
             if (player == null) return false;
             if (player.IsDead) return false;
             if (player.IsInSafeZone) return false;
@@ -622,6 +676,8 @@ namespace DarkMazeMinimal
         {
             suspiciousPos = default;
 
+            if (IsIgnoringPlayerBecauseOfLure()) return false;
+
             if (player == null) return false;
             if (player.IsDead) return false;
             if (player.IsInSafeZone) return false;
@@ -633,6 +689,24 @@ namespace DarkMazeMinimal
 
             suspiciousPos = player.transform.position;
             return true;
+        }
+
+        private void StartIgnoringPlayerBecauseOfLure()
+        {
+            if (lureIgnorePlayerTime <= 0f)
+                return;
+
+            _ignorePlayerUntilTime = Mathf.Max(
+                _ignorePlayerUntilTime,
+                Time.time + lureIgnorePlayerTime
+            );
+
+            Debug.Log($"[EnemyChaser] Ignore player because of lure until {_ignorePlayerUntilTime:F2} | {name}", this);
+        }
+
+        private bool IsIgnoringPlayerBecauseOfLure()
+        {
+            return Time.time < _ignorePlayerUntilTime;
         }
 
         private bool IsInsideActivityArea(Vector3 worldPos)

@@ -91,7 +91,7 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 0.2941177, b: 0.3894537, a: 1}
-  m_Intensity: 17.61
+  m_Intensity: 13
   m_Range: 2.73
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -601,7 +601,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3623558265481915961}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.57241476, z: -0, w: 0.8199643}
+  m_LocalRotation: {x: 0, y: -0.5724178, z: 0, w: 0.8199622}
   m_LocalPosition: {x: 1.65, y: -2.65627, z: -18.625}
   m_LocalScale: {x: 1.9428, y: 1.9428, z: 1.9428}
   m_ConstrainProportionsScale: 0
@@ -703,7 +703,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 5
+  m_Speed: 6
   m_Acceleration: 12
   avoidancePriority: 50
   m_AngularSpeed: 360
@@ -735,15 +735,17 @@ MonoBehaviour:
   patrolPoints: []
   patrolWaitTime: 1.2
   patrolPointReachDistance: 0.5
-  suspiciousRange: 21.9
-  detectRange: 17.2
+  suspiciousRange: 30.8
+  detectRange: 43
   loseTargetRange: 35.8
   suspiciousStayTime: 1.5
   suspiciousScanSpeed: 100
   suspiciousPointReachDistance: 0.8
-  activityRadius: 38.8
+  activityRadius: 41.4
   lureMaxConsiderDistance: 13.1
   lureCanInterruptChase: 0
+  ignorePlayerWhileInvestigatingLure: 1
+  lureIgnorePlayerTime: 2.5
   hitBackDistance: 1.5
   hitRecoverTime: 0.83
   triggerHitAnimation: 1
@@ -798,16 +800,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 976c7796724a8f54d9061a5a62df3886, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DarkMazeMinimal.IntroSpiderActor
+  objectToRemove: {fileID: 3623558265481915961}
   agent: {fileID: 5076303605537096934}
   animator: {fileID: 8257980848386598237}
   behavioursToDisableOnDismiss: []
   collidersToDisableOnDismiss: []
-  walkAwayTime: 2.5
-  destroyDelay: 0.5
+  walkAwayTime: 1.5
+  destroyDelay: 2
   manualWalkSpeed: 2
   destroyOnDismiss: 1
   speedFloatName: Speed
   walkingBoolName: IsWalking
+  debugLogs: 0
 --- !u!1 &5733599221082394265
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,8 +922,8 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 0.2941177, b: 0.3894537, a: 1}
-  m_Intensity: 16.4
-  m_Range: 5.58
+  m_Intensity: 10
+  m_Range: 3
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
