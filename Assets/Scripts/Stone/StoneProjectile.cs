@@ -12,6 +12,9 @@ namespace DarkMazeMinimal
         [Header("Safety")]
         public float selfDestructAfter = 8f;
 
+        [Header("Spawn Offset")]
+        [SerializeField] private float lureSpawnUpOffset = 0.05f;
+
         private bool _spawned;
 
         private void Start()
@@ -25,13 +28,28 @@ namespace DarkMazeMinimal
             if (_spawned) return;
             _spawned = true;
 
+            Vector3 spawnPos = transform.position;
+
+            if (collision.contactCount > 0)
+            {
+                spawnPos = collision.GetContact(0).point + Vector3.up * lureSpawnUpOffset;
+            }
+
             Debug.Log($"[StoneProjectile] Landed on {collision.collider.name}", this);
 
             if (lurePrefab != null)
             {
-                GameObject lureGO = Instantiate(lurePrefab, transform.position, Quaternion.identity);
-                var lure = lureGO.GetComponent<LureZone>();
-                if (lure != null) lure.duration = lureDuration;
+                GameObject lureGO = Instantiate(lurePrefab, spawnPos, Quaternion.identity);
+
+                LureZone lure = lureGO.GetComponent<LureZone>();
+                if (lure != null)
+                {
+                    lure.duration = lureDuration;
+                }
+                else
+                {
+                    Debug.LogWarning("[StoneProjectile] Spawned lurePrefab has no LureZone component.", lureGO);
+                }
 
                 Debug.Log($"[StoneProjectile] Spawned LureZone: {lureGO.name} | duration={lureDuration}", lureGO);
             }
@@ -44,4 +62,3 @@ namespace DarkMazeMinimal
         }
     }
 }
-

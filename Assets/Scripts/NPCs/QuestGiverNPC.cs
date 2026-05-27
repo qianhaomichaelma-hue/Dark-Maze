@@ -17,6 +17,12 @@ namespace DarkMazeMinimal
         [SerializeField] private bool giveTorchOnFirstDialogue = true;
         [SerializeField] private bool equipTorchImmediately = true;
 
+        [Header("Reward Audio")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip torchGainClip;
+        [Range(0f, 1f)]
+        [SerializeField] private float torchGainVolume = 1f;
+
         [Header("Optional Visuals")]
         [Tooltip("Player hand torch model, torch light, or any object that should appear after getting the torch.")]
         [SerializeField] private GameObject[] objectsToEnableAfterTorchGiven;
@@ -65,6 +71,9 @@ namespace DarkMazeMinimal
         {
             if (quest == null)
                 quest = FindFirstObjectByType<RescueQuestController>();
+
+            if (audioSource == null)
+                audioSource = GetComponent<AudioSource>();
         }
 
         public void Interact(PlayerInteractor interactor)
@@ -176,11 +185,27 @@ namespace DarkMazeMinimal
             hasGivenTorch = true;
 
             EnableObjectsAfterTorchGiven();
+            PlayTorchGainSound();
 
             if (ItemGainPopupUI.Instance != null)
                 ItemGainPopupUI.Instance.ShowItemGain(torchItem.displayName, torchAmount);
 
             Log("Torch given to player.");
+        }
+
+        private void PlayTorchGainSound()
+        {
+            if (torchGainClip == null)
+                return;
+
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(torchGainClip, torchGainVolume);
+            }
+            else
+            {
+                AudioSource.PlayClipAtPoint(torchGainClip, transform.position, torchGainVolume);
+            }
         }
 
         private void EnableObjectsAfterTorchGiven()

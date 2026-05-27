@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using StarterAssets;
 using DarkMazeItems;
@@ -20,6 +21,16 @@ namespace DarkMazePlayer
         [SerializeField] private LayerMask enemyLayers = ~0;
         [SerializeField] private float cooldown = 5f;
 
+        [Header("Attack Timing")]
+        [Tooltip("Delay before the hit check happens. Use this to match the moment when the torch visually reaches the enemy.")]
+        [SerializeField] private float hitDelay = 0.16f;
+
+        [Tooltip("If true, the attack direction is locked when the swing starts. This usually feels better for melee attacks.")]
+        [SerializeField] private bool lockAttackDirectionOnSwing = true;
+
+        [Tooltip("If true, the player must still be holding the torch when the delayed hit frame happens.")]
+        [SerializeField] private bool requireTorchAtHitMoment = true;
+
         [Header("Visual")]
         [SerializeField] private PlayerTorchVisual torchVisual;
 
@@ -30,6 +41,7 @@ namespace DarkMazePlayer
 
         [Header("Debug")]
         [SerializeField] private bool drawDebug = true;
+        [SerializeField] private bool debugLogs = true;
         [SerializeField] private int debugSegments = 6;
 
         private StarterAssetsInputs _inputs;
@@ -38,9 +50,11 @@ namespace DarkMazePlayer
         private Camera _cam;
 
         private float _nextReadyTime = 0f;
+        private Coroutine _attackRoutine;
 
         public bool IsOnCooldown => Time.time < _nextReadyTime;
         public float CooldownRemaining => Mathf.Max(0f, _nextReadyTime - Time.time);
+        public bool IsAttacking => _attackRoutine != null;
 
         private void Awake()
         {
@@ -73,43 +87,87 @@ namespace DarkMazePlayer
             if (_inputs.attack)
             {
                 _inputs.attack = false;
-                TryRepel();
+                TryStartAttack();
             }
         }
 
-        private void TryRepel()
+        private void TryStartAttack()
         {
             if (_equipment == null || torchItem == null)
                 return;
 
             if (!_equipment.IsHolding(torchItem))
             {
-                Debug.Log("[PlayerTorchRepel] Not holding torch.");
+                Log("Not holding torch.");
                 return;
             }
 
             if (Time.time < _nextReadyTime)
             {
-                Debug.Log($"[PlayerTorchRepel] Cooldown: {CooldownRemaining:F1}s");
+                Log($"Cooldown: {CooldownRemaining:F1}s");
                 return;
             }
 
-            // 攻击允许后，播放手持火把的挥舞表现
+            if (_attackRoutine != null)
+            {
+                Log("Attack ignored. Already attacking.");
+                return;
+            }
+
+            Vector3 lockedForward = GetAttackForward();
+
+            _nextReadyTime = Time.time + cooldown;
+            _attackRoutine = StartCoroutine(AttackRoutine(lockedForward));
+        }
+
+        private IEnumerator AttackRoutine(Vector3 lockedForward)
+        {
+            Log($"Attack started. Hit will happen after {hitDelay:F2}s.");
+
             if (torchVisual != null)
                 torchVisual.PlaySwing();
 
             PlayTorchSwingSFX();
 
-            if (_cam == null)
-                _cam = Camera.main;
+            float delay = Mathf.Max(0f, hitDelay);
 
+            if (delay > 0f)
+                yield return new WaitForSeconds(delay);
+
+            if (_state != null && _state.IsDead)
+            {
+                Log("Attack hit frame cancelled. Player is dead.");
+                _attackRoutine = null;
+                yield break;
+            }
+
+            if (requireTorchAtHitMoment)
+            {
+                if (_equipment == null || torchItem == null || !_equipment.IsHolding(torchItem))
+                {
+                    Log("Attack hit frame cancelled. Player is no longer holding torch.");
+                    _attackRoutine = null;
+                    yield break;
+                }
+            }
+
+            Vector3 forward = lockAttackDirectionOnSwing
+                ? lockedForward
+                : GetAttackForward();
+
+            PerformRepelCheck(forward);
+
+            _attackRoutine = null;
+        }
+
+        private void PerformRepelCheck(Vector3 forward)
+        {
             Vector3 origin = attackOrigin != null
                 ? attackOrigin.position
                 : transform.position + Vector3.up;
 
-            Vector3 forward = _cam != null
-                ? _cam.transform.forward
-                : transform.forward;
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = transform.forward;
 
             forward.y = 0f;
 
@@ -154,6 +212,7 @@ namespace DarkMazePlayer
             }
 
             bool hitAny = false;
+            int successCount = 0;
 
             foreach (EnemyChaser enemy in hitEnemies)
             {
@@ -161,14 +220,34 @@ namespace DarkMazePlayer
 
                 bool success = enemy.TryRepelFrom(transform.position);
                 if (success)
+                {
                     hitAny = true;
+                    successCount++;
+                }
             }
 
-            _nextReadyTime = Time.time + cooldown;
+            Log(hitAny
+                ? $"Delayed hit frame SUCCESS. Valid enemies found={hitEnemies.Count}, repelled={successCount}."
+                : $"Delayed hit frame missed. Valid enemies found={hitEnemies.Count}.");
+        }
 
-            Debug.Log(hitAny
-                ? $"[PlayerTorchRepel] Hit {hitEnemies.Count} enemy(s)."
-                : "[PlayerTorchRepel] Attack used, no valid enemy hit.");
+        private Vector3 GetAttackForward()
+        {
+            if (_cam == null)
+                _cam = Camera.main;
+
+            Vector3 forward = _cam != null
+                ? _cam.transform.forward
+                : transform.forward;
+
+            forward.y = 0f;
+
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = transform.forward;
+
+            forward.Normalize();
+
+            return forward;
         }
 
         private void PlayTorchSwingSFX()
@@ -177,6 +256,15 @@ namespace DarkMazePlayer
                 return;
 
             torchSwingAudioSource.PlayOneShot(torchSwingSFX, torchSwingVolume);
+        }
+
+        private void OnDisable()
+        {
+            if (_attackRoutine != null)
+            {
+                StopCoroutine(_attackRoutine);
+                _attackRoutine = null;
+            }
         }
 
         private void OnDrawGizmosSelected()
@@ -207,6 +295,12 @@ namespace DarkMazePlayer
             }
 
             Gizmos.DrawLine(origin, origin + forward * attackRange);
+        }
+
+        private void Log(string message)
+        {
+            if (debugLogs)
+                Debug.Log($"[PlayerTorchRepel] {message}", this);
         }
     }
 }

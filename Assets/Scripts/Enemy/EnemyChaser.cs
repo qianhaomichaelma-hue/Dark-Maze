@@ -61,6 +61,27 @@ namespace DarkMazeMinimal
 
         [SerializeField] private bool triggerHitAnimation = true;
 
+        [Header("Feedback - Hit Stop")]
+        [SerializeField] private bool useHitStop = true;
+
+        [Tooltip("Debug value is intentionally large. Reduce after confirming it works.")]
+        [SerializeField] private float hitStopDuration = 0.18f;
+
+        [Tooltip("Debug value is intentionally strong. 0.01 means almost frozen.")]
+        [SerializeField] private float hitStopTimeScale = 0.01f;
+
+        [Header("Feedback - Camera Shake")]
+        [SerializeField] private bool cameraShakeOnHit = true;
+
+        [Tooltip("Debug value is intentionally large. Reduce after confirming it works.")]
+        [SerializeField] private float cameraShakeDuration = 0.45f;
+
+        [Tooltip("Debug value is intentionally strong. Reduce after confirming it works.")]
+        [SerializeField] private float cameraShakeStrength = 0.25f;
+
+        [Header("Debug - Hit Feedback")]
+        [SerializeField] private bool debugHitFeedback = true;
+
         [Header("Animation")]
         [SerializeField] private string stateParamName = "State";
         [SerializeField] private string speedParamName = "Speed";
@@ -191,10 +212,10 @@ namespace DarkMazeMinimal
         }
 
         public void InitializeRuntimeReferences(
-    PlayerState runtimePlayer,
-    Transform runtimeHomePoint,
-    Transform runtimeActivityCenter = null
-)
+            PlayerState runtimePlayer,
+            Transform runtimeHomePoint,
+            Transform runtimeActivityCenter = null
+        )
         {
             if (runtimePlayer != null)
                 player = runtimePlayer;
@@ -223,6 +244,7 @@ namespace DarkMazeMinimal
                 this
             );
         }
+
         private void Update()
         {
             if (player == null || homePoint == null || activityCenter == null)
@@ -472,12 +494,6 @@ namespace DarkMazeMinimal
                 EnterReturnState();
                 return;
             }
-
-            //if (player.IsInSafeZone)
-            //{
-            //    EnterReturnState();
-            //    return;
-            //}
 
             if (!IsInsideActivityArea(transform.position))
             {
@@ -870,9 +886,17 @@ namespace DarkMazeMinimal
 
         public bool TryRepelFrom(Vector3 sourcePosition)
         {
+            Debug.Log(
+                $"[EnemyChaser] TryRepelFrom called | enemy={name} | state={_state} | source={sourcePosition} | enemyPos={transform.position}",
+                this
+            );
+
             if (_state != EnemyState.Chase)
             {
-                Debug.Log($"[EnemyChaser] Repel ignored because enemy is not chasing | {name} | state={_state}", this);
+                Debug.LogWarning(
+                    $"[EnemyChaser] Repel ignored because enemy is not chasing | enemy={name} | currentState={_state}",
+                    this
+                );
                 return false;
             }
 
@@ -886,16 +910,67 @@ namespace DarkMazeMinimal
 
             Vector3 rawTarget = transform.position + away * hitBackDistance;
 
+            Debug.Log(
+                $"[EnemyChaser] Repel calculation | away={away} | hitBackDistance={hitBackDistance} | rawTarget={rawTarget}",
+                this
+            );
+
             if (NavMesh.SamplePosition(rawTarget, out NavMeshHit hit, 2f, NavMesh.AllAreas))
             {
                 EnterHitState(hit.position);
 
-                Debug.Log($"[EnemyChaser] Repelled / Hit | {name} | hitBackDistance={hitBackDistance} | target={hit.position}", this);
+                Debug.Log(
+                    $"[EnemyChaser] Repelled / Hit SUCCESS | enemy={name} | navmeshTarget={hit.position}",
+                    this
+                );
+
+                PlayHitFeedback();
+
                 return true;
             }
 
-            Debug.Log($"[EnemyChaser] Repel failed to find navmesh point | {name}", this);
+            Debug.LogWarning(
+                $"[EnemyChaser] Repel failed to find navmesh point | enemy={name} | rawTarget={rawTarget}",
+                this
+            );
+
             return false;
+        }
+
+        private void PlayHitFeedback()
+        {
+            bool hasHitStopManager = HitStopManager.Instance != null;
+            bool hasCameraShakeTarget = CameraShakeTarget.Instance != null;
+
+            if (debugHitFeedback)
+            {
+                Debug.Log(
+                    $"[EnemyChaser] PlayHitFeedback | enemy={name} | " +
+                    $"useHitStop={useHitStop} | HitStopManager={(hasHitStopManager ? "FOUND" : "MISSING")} | " +
+                    $"hitStopDuration={hitStopDuration} | hitStopTimeScale={hitStopTimeScale} | " +
+                    $"cameraShakeOnHit={cameraShakeOnHit} | CameraShakeTarget={(hasCameraShakeTarget ? "FOUND" : "MISSING")} | " +
+                    $"cameraShakeDuration={cameraShakeDuration} | cameraShakeStrength={cameraShakeStrength}",
+                    this
+                );
+            }
+
+            if (useHitStop && hasHitStopManager)
+            {
+                HitStopManager.Instance.PlayHitStop(hitStopDuration, hitStopTimeScale);
+            }
+            else if (useHitStop && !hasHitStopManager)
+            {
+                Debug.LogWarning("[EnemyChaser] HitStopManager missing. Hit stop will not play.", this);
+            }
+
+            if (cameraShakeOnHit && hasCameraShakeTarget)
+            {
+                CameraShakeTarget.Instance.Shake(cameraShakeDuration, cameraShakeStrength);
+            }
+            else if (cameraShakeOnHit && !hasCameraShakeTarget)
+            {
+                Debug.LogWarning("[EnemyChaser] CameraShakeTarget missing. Camera shake will not play.", this);
+            }
         }
 
         private void PlayPlayerDetectedSFX()
