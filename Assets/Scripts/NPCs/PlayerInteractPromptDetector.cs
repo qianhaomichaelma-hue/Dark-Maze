@@ -71,9 +71,9 @@ namespace DarkMazePlayer
                 return;
             }
 
-            InteractPromptTarget prompt = hit.collider.GetComponentInParent<InteractPromptTarget>();
+            InteractPromptTarget prompt = GetPromptTargetFromHit(hit.collider, interactable);
 
-            if (prompt == null)
+            if (prompt == null || !prompt.enabled)
             {
                 ClearCurrentPrompt();
                 return;
@@ -93,6 +93,37 @@ namespace DarkMazePlayer
             {
                 if (behaviours[i] is IInteractable interactable)
                     return interactable;
+            }
+
+            return null;
+        }
+
+        private InteractPromptTarget GetPromptTargetFromHit(Collider hitCollider, IInteractable interactable)
+        {
+            if (hitCollider == null)
+                return null;
+
+            InteractPromptTarget prompt = hitCollider.GetComponentInParent<InteractPromptTarget>();
+
+            if (prompt != null)
+                return prompt;
+
+            prompt = hitCollider.GetComponentInChildren<InteractPromptTarget>(true);
+
+            if (prompt != null)
+                return prompt;
+
+            if (interactable is MonoBehaviour mb)
+            {
+                prompt = mb.GetComponentInChildren<InteractPromptTarget>(true);
+
+                if (prompt != null)
+                    return prompt;
+
+                prompt = mb.GetComponentInParent<InteractPromptTarget>();
+
+                if (prompt != null)
+                    return prompt;
             }
 
             return null;

@@ -34,6 +34,9 @@ namespace DarkMazeMinimal
         [Header("Speaker")]
         [SerializeField] private string speakerName = "Old Survivor";
 
+        [Header("Dialogue Audio")]
+        [SerializeField] private DialogueAudioProfile dialogueAudio = new DialogueAudioProfile();
+
         [Header("Dialogue - First Time")]
         [TextArea(2, 5)]
         [SerializeField]
@@ -104,24 +107,41 @@ namespace DarkMazeMinimal
                 case RescueQuestState.NotStarted:
                     isTalking = true;
 
-                    DialogueUI.Instance.ShowLines(speakerName, firstDialogueLines, () =>
-                    {
-                        isTalking = false;
-                        HandleFirstDialogueFinished(interactor);
-                    });
+                    DialogueUI.Instance.ShowLines(
+                        speakerName,
+                        firstDialogueLines,
+                        () =>
+                        {
+                            isTalking = false;
+                            HandleFirstDialogueFinished(interactor);
+                        },
+                        dialogueAudio
+                    );
 
                     break;
 
                 case RescueQuestState.TaskAssigned:
-                    DialogueUI.Instance.ShowSingleLine(speakerName, repeatBeforeRescue);
+                    DialogueUI.Instance.ShowSingleLine(
+                        speakerName,
+                        repeatBeforeRescue,
+                        audioProfile: dialogueAudio
+                    );
                     break;
 
                 case RescueQuestState.Escorting:
-                    DialogueUI.Instance.ShowSingleLine(speakerName, repeatWhileEscorting);
+                    DialogueUI.Instance.ShowSingleLine(
+                        speakerName,
+                        repeatWhileEscorting,
+                        audioProfile: dialogueAudio
+                    );
                     break;
 
                 case RescueQuestState.Completed:
-                    DialogueUI.Instance.ShowSingleLine(speakerName, repeatAfterComplete);
+                    DialogueUI.Instance.ShowSingleLine(
+                        speakerName,
+                        repeatAfterComplete,
+                        audioProfile: dialogueAudio
+                    );
                     break;
             }
         }

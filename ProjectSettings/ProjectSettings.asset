@@ -825,22 +825,24 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Android: 
-    EmbeddedLinux: 
+    Android: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    EmbeddedLinux: KAMGAM_UITOOLKIT_WORLD_IMAGE
     GameCoreScarlett: 
-    GameCoreXboxOne: 
-    Kepler: 
-    LinuxHeadlessSimulation: 
-    Nintendo Switch: 
-    PS4: 
-    PS5: 
-    QNX: 
-    ReservedCFE: 
-    Standalone: 
-    VisionOS: 
-    WebGL: 
-    XboxOne: 
-    tvOS: 
+    GameCoreXboxOne: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    Kepler: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    LinuxHeadlessSimulation: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    Nintendo Switch: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    PS4: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    PS5: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    QNX: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    ReservedCFE: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    Standalone: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    VisionOS: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    WebGL: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    Windows Store Apps: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    XboxOne: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    iPhone: KAMGAM_UITOOLKIT_WORLD_IMAGE
+    tvOS: KAMGAM_UITOOLKIT_WORLD_IMAGE
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

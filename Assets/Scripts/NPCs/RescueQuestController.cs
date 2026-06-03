@@ -9,6 +9,7 @@ namespace DarkMazeMinimal
         NotStarted,
         TaskAssigned,
         Escorting,
+        WaitingFinalDialogue,
         Completed
     }
 
@@ -28,6 +29,11 @@ namespace DarkMazeMinimal
         public UnityEvent onQuestStarted;
         public UnityEvent onEscortStarted;
         public UnityEvent onEscortFailedByDeath;
+
+        [Tooltip("Called when the player reaches the escort goal, but before final dialogue.")]
+        public UnityEvent onEscortArrivedAtGoal;
+
+        [Tooltip("Called only after the player talks to the rescued NPC at the goal.")]
         public UnityEvent onQuestCompleted;
 
         [Header("Debug")]
@@ -35,12 +41,15 @@ namespace DarkMazeMinimal
 
         [SerializeField] private RescueQuestState state = RescueQuestState.NotStarted;
 
+        private bool _handledCurrentDeath = false;
+        private Transform _lastRescuedNpcStandPoint;
+
         public RescueQuestState State => state;
+
         public bool IsQuestAssigned => state == RescueQuestState.TaskAssigned;
         public bool IsEscorting => state == RescueQuestState.Escorting;
+        public bool IsWaitingFinalDialogue => state == RescueQuestState.WaitingFinalDialogue;
         public bool IsCompleted => state == RescueQuestState.Completed;
-
-        private bool _handledCurrentDeath = false;
 
         private void Awake()
         {
@@ -80,6 +89,7 @@ namespace DarkMazeMinimal
                 return;
 
             state = RescueQuestState.TaskAssigned;
+
             Log("Quest started.");
             onQuestStarted?.Invoke();
         }
@@ -108,17 +118,32 @@ namespace DarkMazeMinimal
             onEscortStarted?.Invoke();
         }
 
-        public void CompleteQuest(Transform rescuedNpcStandPoint = null)
+        public void ArriveAtEscortGoal(Transform rescuedNpcStandPoint = null)
         {
             if (state != RescueQuestState.Escorting)
+                return;
+
+            state = RescueQuestState.WaitingFinalDialogue;
+            _lastRescuedNpcStandPoint = rescuedNpcStandPoint;
+
+            if (rescueNpc != null)
+                rescueNpc.SetWaitingFinalDialogue(rescuedNpcStandPoint);
+
+            Log("Escort arrived at goal. Waiting for final NPC dialogue.");
+            onEscortArrivedAtGoal?.Invoke();
+        }
+
+        public void CompleteQuestAfterFinalDialogue()
+        {
+            if (state != RescueQuestState.WaitingFinalDialogue)
                 return;
 
             state = RescueQuestState.Completed;
 
             if (rescueNpc != null)
-                rescueNpc.SetCompleted(rescuedNpcStandPoint);
+                rescueNpc.SetCompleted(_lastRescuedNpcStandPoint);
 
-            Log("Quest completed.");
+            Log("Quest completed after final dialogue.");
             onQuestCompleted?.Invoke();
         }
 

@@ -787,6 +787,13 @@ MonoBehaviour:
   hitBackDistance: 1.2
   hitRecoverTime: 0.83
   triggerHitAnimation: 1
+  useHitStop: 1
+  hitStopDuration: 0.18
+  hitStopTimeScale: 0.01
+  cameraShakeOnHit: 1
+  cameraShakeDuration: 0.45
+  cameraShakeStrength: 0.25
+  debugHitFeedback: 1
   stateParamName: State
   speedParamName: Speed
   hitTriggerName: Hit
@@ -796,7 +803,7 @@ MonoBehaviour:
   eventAudioSource: {fileID: 1936462371955728016}
   playerDetectedSFX: {fileID: 8300000, guid: 3b76851b1b590834cb0d62fee7b480a2, type: 3}
   playerDetectedVolume: 1.5
-  detectedSFXCooldown: 3
+  detectedSFXCooldown: 4
   enemyHitSFX: {fileID: 8300000, guid: eb14f5ec55f9c7a468c4bffb534dea7a, type: 3}
   enemyHitVolume: 1
   enemyHitSFXCooldown: 0.2

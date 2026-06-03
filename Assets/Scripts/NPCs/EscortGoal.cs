@@ -10,7 +10,7 @@ namespace DarkMazeMinimal
         [SerializeField] private RescueQuestController quest;
 
         [Header("NPC Final Position")]
-        [Tooltip("Optional. If assigned, rescued NPC will be placed here after quest completion.")]
+        [Tooltip("Optional. If assigned, rescued NPC will be placed here after reaching the goal.")]
         [SerializeField] private Transform rescuedNpcStandPoint;
 
         [Header("Debug")]
@@ -34,10 +34,10 @@ namespace DarkMazeMinimal
             if (player == null)
                 return;
 
-            quest.CompleteQuest(rescuedNpcStandPoint);
+            quest.ArriveAtEscortGoal(rescuedNpcStandPoint);
 
             if (debugLogs)
-                Debug.Log("[EscortGoal] Quest completed.", this);
+                Debug.Log("[EscortGoal] Escort arrived. Waiting for final dialogue.", this);
         }
 
         private void OnDrawGizmosSelected()

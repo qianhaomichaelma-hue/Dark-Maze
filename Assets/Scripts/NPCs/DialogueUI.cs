@@ -4,6 +4,25 @@ using TMPro;
 
 namespace DarkMazeMinimal
 {
+    [Serializable]
+    public class DialogueAudioProfile
+    {
+        [Tooltip("Optional. If assigned, dialogue audio will play from this source. If empty, DialogueUI's default AudioSource will be used.")]
+        public AudioSource audioSourceOverride;
+
+        [Tooltip("Each time a new dialogue line appears, one clip from this list will be randomly played.")]
+        public AudioClip[] lineSFXList;
+
+        [Tooltip("Played when the player advances to the next line.")]
+        public AudioClip advanceSFX;
+
+        [Range(0f, 1f)]
+        public float lineVolume = 0.7f;
+
+        [Range(0f, 1f)]
+        public float advanceVolume = 0.5f;
+    }
+
     [DisallowMultipleComponent]
     public class DialogueUI : MonoBehaviour
     {
@@ -18,22 +37,18 @@ namespace DarkMazeMinimal
         [Header("Text")]
         [SerializeField] private string continueMessage = "Press E to continue";
 
-        [Header("Audio")]
+        [Header("Default Audio")]
         [SerializeField] private AudioSource audioSource;
 
-        [Tooltip("每进入一句新对话时，从这个列表里随机播放一个音效。")]
-        [SerializeField] private AudioClip[] lineSFXList;
-
-        [Tooltip("玩家按 E 切到下一句时播放。可为空。")]
-        [SerializeField] private AudioClip advanceSFX;
-
-        [SerializeField] private float lineVolume = 0.7f;
-        [SerializeField] private float advanceVolume = 0.5f;
+        [Tooltip("Fallback audio used only when an NPC does not provide its own DialogueAudioProfile.")]
+        [SerializeField] private DialogueAudioProfile defaultAudio = new DialogueAudioProfile();
 
         private string _speakerName;
         private string[] _lines;
         private int _index;
         private Action _onFinished;
+
+        private DialogueAudioProfile _currentAudioProfile;
 
         public bool IsOpen => panel != null && panel.activeSelf;
 
@@ -63,7 +78,12 @@ namespace DarkMazeMinimal
             }
         }
 
-        public void ShowLines(string speakerName, string[] lines, Action onFinished = null)
+        public void ShowLines(
+            string speakerName,
+            string[] lines,
+            Action onFinished = null,
+            DialogueAudioProfile audioProfile = null
+        )
         {
             if (lines == null || lines.Length == 0)
             {
@@ -76,6 +96,7 @@ namespace DarkMazeMinimal
             _lines = lines;
             _index = 0;
             _onFinished = onFinished;
+            _currentAudioProfile = audioProfile ?? defaultAudio;
 
             if (panel != null)
                 panel.SetActive(true);
@@ -83,9 +104,14 @@ namespace DarkMazeMinimal
             ShowCurrentLine();
         }
 
-        public void ShowSingleLine(string speakerName, string line, Action onFinished = null)
+        public void ShowSingleLine(
+            string speakerName,
+            string line,
+            Action onFinished = null,
+            DialogueAudioProfile audioProfile = null
+        )
         {
-            ShowLines(speakerName, new[] { line }, onFinished);
+            ShowLines(speakerName, new[] { line }, onFinished, audioProfile);
         }
 
         public void Advance()
@@ -114,6 +140,7 @@ namespace DarkMazeMinimal
             _lines = null;
             _index = 0;
             _onFinished = null;
+            _currentAudioProfile = null;
 
             if (panel != null)
                 panel.SetActive(false);
@@ -135,27 +162,48 @@ namespace DarkMazeMinimal
 
         private void PlayRandomLineSFX()
         {
-            if (audioSource == null)
+            DialogueAudioProfile profile = _currentAudioProfile ?? defaultAudio;
+            if (profile == null)
                 return;
 
-            if (lineSFXList == null || lineSFXList.Length == 0)
+            if (profile.lineSFXList == null || profile.lineSFXList.Length == 0)
                 return;
 
-            int randomIndex = UnityEngine.Random.Range(0, lineSFXList.Length);
-            AudioClip selectedClip = lineSFXList[randomIndex];
+            AudioSource source = GetAudioSource(profile);
+            if (source == null)
+                return;
+
+            int randomIndex = UnityEngine.Random.Range(0, profile.lineSFXList.Length);
+            AudioClip selectedClip = profile.lineSFXList[randomIndex];
 
             if (selectedClip == null)
                 return;
 
-            audioSource.PlayOneShot(selectedClip, lineVolume);
+            source.PlayOneShot(selectedClip, profile.lineVolume);
         }
 
         private void PlayAdvanceSFX()
         {
-            if (audioSource == null || advanceSFX == null)
+            DialogueAudioProfile profile = _currentAudioProfile ?? defaultAudio;
+            if (profile == null)
                 return;
 
-            audioSource.PlayOneShot(advanceSFX, advanceVolume);
+            if (profile.advanceSFX == null)
+                return;
+
+            AudioSource source = GetAudioSource(profile);
+            if (source == null)
+                return;
+
+            source.PlayOneShot(profile.advanceSFX, profile.advanceVolume);
+        }
+
+        private AudioSource GetAudioSource(DialogueAudioProfile profile)
+        {
+            if (profile != null && profile.audioSourceOverride != null)
+                return profile.audioSourceOverride;
+
+            return audioSource;
         }
     }
 }
