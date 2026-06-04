@@ -1,11 +1,22 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using DarkMazePlayer;
+using DarkMazeItems;
 
 namespace DarkMazeMinimal
 {
-    public class Bonfire : MonoBehaviour
+    public class Bonfire : MonoBehaviour, IInteractable
     {
         public Light fireLit;
+
+        [Header("Interaction")]
+        [SerializeField] private ItemData requiredTorchItem;
+        [SerializeField] private bool requireTorchToIgnite = true;
+
+        [Tooltip("Optional. If assigned, the prompt will hide and disable after this bonfire is lit.")]
+        [SerializeField] private InteractPromptTarget promptTarget;
+
+        [SerializeField] private bool disablePromptAfterLit = true;
 
         [Header("Bonfire State")]
         [SerializeField] private bool isLit = false;
@@ -67,6 +78,9 @@ namespace DarkMazeMinimal
         {
             if (progressController == null && autoFindProgressController)
                 progressController = FindFirstObjectByType<CampfireProgressController>();
+
+            if (promptTarget == null)
+                promptTarget = GetComponentInChildren<InteractPromptTarget>(true);
         }
 
         private void Start()
@@ -90,11 +104,58 @@ namespace DarkMazeMinimal
                     GameManager.Instance.SetRespawnPoint(respawnAnchor);
                     Log($"Starting checkpoint set -> {respawnAnchor.name}");
                 }
+
+                if (disablePromptAfterLit)
+                    DisablePrompt();
             }
             else
             {
                 StopFireLoopSFX();
             }
+        }
+
+        public void Interact(PlayerInteractor interactor)
+        {
+            if (interactor == null)
+                return;
+
+            if (isLit)
+            {
+                TryActivate(interactor.PlayerState);
+
+                if (disablePromptAfterLit)
+                    DisablePrompt();
+
+                return;
+            }
+
+            if (requireTorchToIgnite)
+            {
+                if (requiredTorchItem == null)
+                {
+                    Debug.LogWarning($"[Bonfire] Required Torch Item is missing on {name}.", this);
+                    return;
+                }
+
+                PlayerEquipment equipment = interactor.Equipment;
+
+                if (equipment == null)
+                {
+                    Debug.LogWarning("[Bonfire] Player has no PlayerEquipment.", interactor);
+                    return;
+                }
+
+                if (!equipment.IsHolding(requiredTorchItem))
+                {
+                    Log("Player needs to hold the required torch item.");
+                    return;
+                }
+            }
+
+            bool success = TryIgnite();
+
+            if (success && disablePromptAfterLit)
+                DisablePrompt();
         }
 
         public void TryActivate(PlayerState player)
@@ -270,6 +331,15 @@ namespace DarkMazeMinimal
 
             if (fireLoopAudioSource.isPlaying)
                 fireLoopAudioSource.Stop();
+        }
+
+        private void DisablePrompt()
+        {
+            if (promptTarget == null)
+                return;
+
+            promptTarget.Hide();
+            promptTarget.enabled = false;
         }
 
         private void Log(string message)

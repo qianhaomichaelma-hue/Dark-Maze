@@ -33,6 +33,23 @@ namespace DarkMazeMinimal
         [SerializeField] private float detectRange = 6f;
         [SerializeField] private float loseTargetRange = 10f;
 
+        [Header("Detection - Height Limit")]
+        [SerializeField] private bool useHeightLimitForDetection = true;
+
+        [Tooltip("Player/enemy height difference must be lower than this to enter Chase.")]
+        [SerializeField] private float maxDetectHeightDifference = 2.0f;
+
+        [Tooltip("Player/enemy height difference must be lower than this to enter SuspiciousPlayer.")]
+        [SerializeField] private float maxSuspiciousHeightDifference = 2.5f;
+
+        [Tooltip("If true, enemy gives up Chase when height difference becomes too large.")]
+        [SerializeField] private bool loseChaseWhenHeightTooDifferent = true;
+
+        [SerializeField] private float maxChaseHeightDifference = 3.0f;
+
+        [Tooltip("If true, enemy also gives up SuspiciousPlayer when height difference becomes too large.")]
+        [SerializeField] private bool loseSuspiciousWhenHeightTooDifferent = true;
+
         [Header("Suspicious / Investigation")]
         [SerializeField] private float suspiciousStayTime = 1.5f;
         [SerializeField] private float suspiciousScanSpeed = 100f;
@@ -543,6 +560,12 @@ namespace DarkMazeMinimal
                 return;
             }
 
+            if (loseSuspiciousWhenHeightTooDifferent && !IsPlayerWithinHeightLimit(maxSuspiciousHeightDifference))
+            {
+                EnterReturnState();
+                return;
+            }
+
             if (UpdateMoveToInterestAndScan())
             {
                 EnterReturnState();
@@ -558,6 +581,12 @@ namespace DarkMazeMinimal
             }
 
             if (player.IsInSafeZone)
+            {
+                EnterReturnState();
+                return;
+            }
+
+            if (loseChaseWhenHeightTooDifferent && !IsPlayerWithinHeightLimit(maxChaseHeightDifference))
             {
                 EnterReturnState();
                 return;
@@ -684,6 +713,9 @@ namespace DarkMazeMinimal
             if (player.IsInSafeZone) return false;
             if (!IsInsideActivityArea(player.transform.position)) return false;
 
+            if (!IsPlayerWithinHeightLimit(maxDetectHeightDifference))
+                return false;
+
             float dist = Vector3.Distance(transform.position, player.transform.position);
             return dist <= detectRange;
         }
@@ -699,12 +731,27 @@ namespace DarkMazeMinimal
             if (player.IsInSafeZone) return false;
             if (!IsInsideActivityArea(player.transform.position)) return false;
 
+            if (!IsPlayerWithinHeightLimit(maxSuspiciousHeightDifference))
+                return false;
+
             float dist = Vector3.Distance(transform.position, player.transform.position);
             if (dist > suspiciousRange) return false;
             if (dist <= detectRange) return false;
 
             suspiciousPos = player.transform.position;
             return true;
+        }
+
+        private bool IsPlayerWithinHeightLimit(float maxHeightDifference)
+        {
+            if (!useHeightLimitForDetection)
+                return true;
+
+            if (player == null)
+                return false;
+
+            float heightDifference = Mathf.Abs(player.transform.position.y - transform.position.y);
+            return heightDifference <= maxHeightDifference;
         }
 
         private void StartIgnoringPlayerBecauseOfLure()

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using StarterAssets;
-using DarkMazeItems;
 using DarkMazeMinimal;
 
 namespace DarkMazePlayer
@@ -11,9 +10,6 @@ namespace DarkMazePlayer
         [Header("Raycast")]
         [SerializeField] private float interactDistance = 3.0f;
         [SerializeField] private LayerMask interactLayers = ~0;
-
-        [Header("Bonfire Requirement")]
-        [SerializeField] private ItemData torchItem;
 
         [Header("Debug")]
         [SerializeField] private bool debugLogs = false;
@@ -80,13 +76,14 @@ namespace DarkMazePlayer
             }
 
             IInteractable interactable = GetInteractableFromHit(hit.collider);
+
             if (interactable != null)
             {
                 interactable.Interact(this);
                 return;
             }
 
-            TryInteractBonfire(hit);
+            Log("Hit object has no IInteractable.");
         }
 
         private IInteractable GetInteractableFromHit(Collider hitCollider)
@@ -103,42 +100,6 @@ namespace DarkMazePlayer
             }
 
             return null;
-        }
-
-        private void TryInteractBonfire(RaycastHit hit)
-        {
-            Bonfire bonfire = hit.collider.GetComponentInParent<Bonfire>();
-            if (bonfire == null)
-            {
-                Log("Hit object has no IInteractable and no Bonfire.");
-                return;
-            }
-
-            if (bonfire.IsLit)
-            {
-                Log("Bonfire already lit.");
-                return;
-            }
-
-            if (_equip == null)
-            {
-                LogWarning("Missing PlayerEquipment on player.");
-                return;
-            }
-
-            if (torchItem == null)
-            {
-                LogWarning("torchItem is not assigned.");
-                return;
-            }
-
-            if (!_equip.IsHolding(torchItem))
-            {
-                Log("Need to hold torch to ignite bonfire.");
-                return;
-            }
-
-            bonfire.TryIgnite();
         }
 
         private void Log(string message)

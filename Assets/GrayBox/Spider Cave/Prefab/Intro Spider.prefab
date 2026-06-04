@@ -763,7 +763,7 @@ MonoBehaviour:
   maxAnimationSpeed: 6
   idleSpeedThreshold: 0.05
   eventAudioSource: {fileID: 4550742087341757978}
-  playerDetectedSFX: {fileID: 8300000, guid: 3b76851b1b590834cb0d62fee7b480a2, type: 3}
+  playerDetectedSFX: {fileID: 8300000, guid: a1380dbb1752c0245a793c4eba513855, type: 3}
   playerDetectedVolume: 1.5
   detectedSFXCooldown: 5
   enemyHitSFX: {fileID: 8300000, guid: eb14f5ec55f9c7a468c4bffb534dea7a, type: 3}
@@ -885,6 +885,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8bf58b4a9900254daabd12bb8c28479, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DarkMazeMinimal.EnemyKill
+  requirePlayerTag: 1
+  killPlayerSFX: {fileID: 8300000, guid: 85d595f769f8484478923ee2c202eb98, type: 3}
+  killPlayerVolume: 1
+  playAs2D: 1
+  killCooldown: 0.5
+  debugLogs: 0
 --- !u!1 &6569278284654437431
 GameObject:
   m_ObjectHideFlags: 0

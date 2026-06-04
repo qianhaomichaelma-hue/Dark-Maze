@@ -13,7 +13,7 @@ namespace DarkMazeMinimal
         [Tooltip("Each time a new dialogue line appears, one clip from this list will be randomly played.")]
         public AudioClip[] lineSFXList;
 
-        [Tooltip("Played when the player advances to the next line.")]
+        [Tooltip("Optional. Played when the player advances to the next line. Can be empty.")]
         public AudioClip advanceSFX;
 
         [Range(0f, 1f)]
@@ -21,6 +21,8 @@ namespace DarkMazeMinimal
 
         [Range(0f, 1f)]
         public float advanceVolume = 0.5f;
+
+        [NonSerialized] public int lastLineSFXIndex = -1;
     }
 
     [DisallowMultipleComponent]
@@ -43,12 +45,20 @@ namespace DarkMazeMinimal
         [Tooltip("Fallback audio used only when an NPC does not provide its own DialogueAudioProfile.")]
         [SerializeField] private DialogueAudioProfile defaultAudio = new DialogueAudioProfile();
 
+        [Header("Audio Rules")]
+        [SerializeField] private bool stopLineSFXOnAdvance = true;
+        [SerializeField] private bool preventImmediateRepeat = true;
+
+        [Tooltip("Usually keep false. If true, pressing continue also plays advanceSFX.")]
+        [SerializeField] private bool playAdvanceSFX = false;
+
         private string _speakerName;
         private string[] _lines;
         private int _index;
         private Action _onFinished;
 
         private DialogueAudioProfile _currentAudioProfile;
+        private AudioSource _currentLineAudioSource;
 
         public bool IsOpen => panel != null && panel.activeSelf;
 
@@ -85,6 +95,8 @@ namespace DarkMazeMinimal
             DialogueAudioProfile audioProfile = null
         )
         {
+            StopCurrentLineSFX();
+
             if (lines == null || lines.Length == 0)
             {
                 Hide();
@@ -119,7 +131,11 @@ namespace DarkMazeMinimal
             if (!IsOpen)
                 return;
 
-            PlayAdvanceSFX();
+            if (stopLineSFXOnAdvance)
+                StopCurrentLineSFX();
+
+            if (playAdvanceSFX)
+                PlayAdvanceSFX();
 
             _index++;
 
@@ -136,6 +152,8 @@ namespace DarkMazeMinimal
 
         public void Hide()
         {
+            StopCurrentLineSFX();
+
             _speakerName = null;
             _lines = null;
             _index = 0;
@@ -173,13 +191,106 @@ namespace DarkMazeMinimal
             if (source == null)
                 return;
 
-            int randomIndex = UnityEngine.Random.Range(0, profile.lineSFXList.Length);
-            AudioClip selectedClip = profile.lineSFXList[randomIndex];
+            int selectedIndex = GetRandomLineSFXIndex(profile);
+
+            if (selectedIndex < 0 || selectedIndex >= profile.lineSFXList.Length)
+                return;
+
+            AudioClip selectedClip = profile.lineSFXList[selectedIndex];
 
             if (selectedClip == null)
                 return;
 
-            source.PlayOneShot(selectedClip, profile.lineVolume);
+            StopCurrentLineSFX();
+
+            _currentLineAudioSource = source;
+
+            source.playOnAwake = false;
+            source.loop = false;
+            source.clip = selectedClip;
+            source.volume = profile.lineVolume;
+            source.Play();
+
+            profile.lastLineSFXIndex = selectedIndex;
+        }
+
+        private int GetRandomLineSFXIndex(DialogueAudioProfile profile)
+        {
+            if (profile == null || profile.lineSFXList == null || profile.lineSFXList.Length == 0)
+                return -1;
+
+            int validCount = 0;
+
+            for (int i = 0; i < profile.lineSFXList.Length; i++)
+            {
+                if (profile.lineSFXList[i] != null)
+                    validCount++;
+            }
+
+            if (validCount <= 0)
+                return -1;
+
+            if (validCount == 1)
+            {
+                for (int i = 0; i < profile.lineSFXList.Length; i++)
+                {
+                    if (profile.lineSFXList[i] != null)
+                        return i;
+                }
+            }
+
+            int selectedIndex = -1;
+            int safety = 30;
+
+            while (safety > 0)
+            {
+                safety--;
+
+                int randomIndex = UnityEngine.Random.Range(0, profile.lineSFXList.Length);
+
+                if (profile.lineSFXList[randomIndex] == null)
+                    continue;
+
+                if (preventImmediateRepeat && randomIndex == profile.lastLineSFXIndex)
+                    continue;
+
+                selectedIndex = randomIndex;
+                break;
+            }
+
+            if (selectedIndex >= 0)
+                return selectedIndex;
+
+            for (int i = 0; i < profile.lineSFXList.Length; i++)
+            {
+                if (profile.lineSFXList[i] == null)
+                    continue;
+
+                if (preventImmediateRepeat && i == profile.lastLineSFXIndex)
+                    continue;
+
+                return i;
+            }
+
+            for (int i = 0; i < profile.lineSFXList.Length; i++)
+            {
+                if (profile.lineSFXList[i] != null)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        private void StopCurrentLineSFX()
+        {
+            if (_currentLineAudioSource == null)
+                return;
+
+            if (_currentLineAudioSource.isPlaying)
+                _currentLineAudioSource.Stop();
+
+            _currentLineAudioSource.clip = null;
+            _currentLineAudioSource = null;
         }
 
         private void PlayAdvanceSFX()

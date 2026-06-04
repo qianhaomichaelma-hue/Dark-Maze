@@ -113,6 +113,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8bf58b4a9900254daabd12bb8c28479, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DarkMazeMinimal.EnemyKill
+  requirePlayerTag: 1
+  killPlayerSFX: {fileID: 8300000, guid: 85d595f769f8484478923ee2c202eb98, type: 3}
+  killPlayerVolume: 1
+  playAs2D: 1
+  killCooldown: 0.5
+  debugLogs: 0
 --- !u!1 &2291899087433009200
 GameObject:
   m_ObjectHideFlags: 0
@@ -776,6 +782,12 @@ MonoBehaviour:
   suspiciousRange: 17.23
   detectRange: 10.41
   loseTargetRange: 11.32
+  useHeightLimitForDetection: 1
+  maxDetectHeightDifference: 2
+  maxSuspiciousHeightDifference: 2.5
+  loseChaseWhenHeightTooDifferent: 1
+  maxChaseHeightDifference: 8
+  loseSuspiciousWhenHeightTooDifferent: 0
   suspiciousStayTime: 1.5
   suspiciousScanSpeed: 100
   suspiciousPointReachDistance: 0.8
@@ -803,7 +815,7 @@ MonoBehaviour:
   eventAudioSource: {fileID: 1936462371955728016}
   playerDetectedSFX: {fileID: 8300000, guid: 3b76851b1b590834cb0d62fee7b480a2, type: 3}
   playerDetectedVolume: 1.5
-  detectedSFXCooldown: 4
+  detectedSFXCooldown: 5
   enemyHitSFX: {fileID: 8300000, guid: eb14f5ec55f9c7a468c4bffb534dea7a, type: 3}
   enemyHitVolume: 1
   enemyHitSFXCooldown: 0.2
