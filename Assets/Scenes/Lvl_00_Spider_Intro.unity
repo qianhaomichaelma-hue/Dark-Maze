@@ -379,9 +379,7 @@ MonoBehaviour:
   typingLoopClip: {fileID: 8300000, guid: 555819744a3de5146b29073849a686c3, type: 3}
   typingAudioVolume: 0.6
   loopTypingAudio: 1
-  nextSceneName: Lvl_01_Spider_GamePlay
-  allowManualAdvance: 1
-  hintMessage: Click to continue
+  nextSceneName: Lvl_01_SpiderCave
 --- !u!82 &291067385
 AudioSource:
   m_ObjectHideFlags: 0
