@@ -54,6 +54,10 @@ namespace DarkMazeMinimal
         [Tooltip("滑行结束后是否恢复玩家控制。通常设 true，因为之后玩家要和 NPC 最终对话。")]
         [SerializeField] private bool restoreControlAfterSlide = true;
 
+        [Header("Objective")]
+        [Tooltip("玩家成功带着 NPC 进入滑梯后，清空 Objective UI。")]
+        [SerializeField] private bool clearObjectiveOnSlideStart = true;
+
         [Header("Audio")]
         [SerializeField] private AudioSource slideAudioSource;
         [SerializeField] private AudioClip slideStartSFX;
@@ -167,6 +171,9 @@ namespace DarkMazeMinimal
             _sliding = true;
             _used = true;
             _nextShakeTime = Time.time;
+
+            if (clearObjectiveOnSlideStart && ObjectiveUI.Instance != null)
+                ObjectiveUI.Instance.ClearObjective();
 
             Transform playerTransform = playerState.transform;
 
@@ -300,17 +307,12 @@ namespace DarkMazeMinimal
             if (_cachedInputs != null)
             {
                 SuppressNonLookInputs();
-
-                // 不 disable StarterAssetsInputs。
-                // 原因：要继续接收 look 输入，滑梯期间可以自由转视角。
                 _cachedInputs.enabled = true;
             }
 
             if (_cachedThirdPersonController != null)
                 _cachedThirdPersonController.enabled = false;
 
-            // 不 disable PlayerInput。
-            // 原因：如果关掉 PlayerInput，StarterAssetsInputs 就收不到鼠标/摇杆 look。
 #if ENABLE_INPUT_SYSTEM
             if (_cachedPlayerInput != null)
                 _cachedPlayerInput.enabled = true;

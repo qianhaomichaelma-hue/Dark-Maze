@@ -15,6 +15,15 @@ namespace DarkMazeMinimal
         [Header("Dialogue Audio")]
         [SerializeField] private DialogueAudioProfile dialogueAudio = new DialogueAudioProfile();
 
+        [Header("Objective Update")]
+        [SerializeField] private bool updateObjectiveAfterFirstRescueDialogue = true;
+
+        [TextArea(1, 3)]
+        [SerializeField] private string objectiveAfterFirstRescueDialogue = "Carry the teddy bear back to safety";
+
+        [Tooltip("If true, this objective is updated only once, after the first rescue dialogue.")]
+        [SerializeField] private bool updateObjectiveOnlyOnce = true;
+
         [Header("Help Call Audio")]
         [SerializeField] private AudioSource helpAudioSource;
         [SerializeField] private AudioClip helpLoopSFX;
@@ -68,6 +77,7 @@ namespace DarkMazeMinimal
 
         private bool _finalAreaActivated;
         private bool _isTalking;
+        private bool _hasUpdatedObjectiveAfterFirstRescueDialogue;
 
         private void Awake()
         {
@@ -92,7 +102,10 @@ namespace DarkMazeMinimal
             if (DialogueUI.Instance == null)
             {
                 if (quest.State == RescueQuestState.TaskAssigned)
+                {
+                    UpdateObjectiveAfterFirstRescueDialogue();
                     TryStartEscort();
+                }
 
                 return;
             }
@@ -122,6 +135,7 @@ namespace DarkMazeMinimal
                         () =>
                         {
                             EndTalking();
+                            UpdateObjectiveAfterFirstRescueDialogue();
                             TryStartEscort();
                         },
                         dialogueAudio
@@ -166,6 +180,27 @@ namespace DarkMazeMinimal
                     );
                     break;
             }
+        }
+
+        private void UpdateObjectiveAfterFirstRescueDialogue()
+        {
+            if (!updateObjectiveAfterFirstRescueDialogue)
+                return;
+
+            if (updateObjectiveOnlyOnce && _hasUpdatedObjectiveAfterFirstRescueDialogue)
+                return;
+
+            if (ObjectiveUI.Instance == null)
+            {
+                Log("ObjectiveUI.Instance is missing. Objective not updated.");
+                return;
+            }
+
+            ObjectiveUI.Instance.SetObjective(objectiveAfterFirstRescueDialogue);
+
+            _hasUpdatedObjectiveAfterFirstRescueDialogue = true;
+
+            Log($"Objective updated after first rescue dialogue: {objectiveAfterFirstRescueDialogue}");
         }
 
         public void ActivateFinalAreaHelpCall()

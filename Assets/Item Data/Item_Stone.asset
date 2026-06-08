@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Item_Stone
   m_EditorClassIdentifier: Assembly-CSharp::DarkMazeItems.ItemData
   itemId: stone
-  displayName: Stone
+  displayName: Ball
+  inventoryIcon: {fileID: 21300000, guid: eddebc54aaf377149b7154b6341242e0, type: 3}
+  selectedInventoryIcon: {fileID: 21300000, guid: 35dadd839cc162d44890e2de85aebe66, type: 3}
   maxStack: 10
   worldPrefab: {fileID: 0}

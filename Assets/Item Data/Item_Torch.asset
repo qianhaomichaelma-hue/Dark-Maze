@@ -14,5 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DarkMazeItems.ItemData
   itemId: torch
   displayName: Torch
+  inventoryIcon: {fileID: 21300000, guid: 7a7bb3cb840d77e49bdde90f10c57fad, type: 3}
+  selectedInventoryIcon: {fileID: 21300000, guid: 4afa9684041bccd409a6cdb10d898bd6, type: 3}
   maxStack: 1
   worldPrefab: {fileID: 1709820563564004756, guid: b0591388f5983c74ca59ed8b672c9d9f, type: 3}

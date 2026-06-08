@@ -736,8 +736,14 @@ MonoBehaviour:
   patrolWaitTime: 1.2
   patrolPointReachDistance: 0.5
   suspiciousRange: 30.8
-  detectRange: 43
+  detectRange: 30
   loseTargetRange: 35.8
+  useHeightLimitForDetection: 1
+  maxDetectHeightDifference: 2
+  maxSuspiciousHeightDifference: 2.5
+  loseChaseWhenHeightTooDifferent: 1
+  maxChaseHeightDifference: 3
+  loseSuspiciousWhenHeightTooDifferent: 1
   suspiciousStayTime: 1.5
   suspiciousScanSpeed: 100
   suspiciousPointReachDistance: 0.8
@@ -810,11 +816,12 @@ MonoBehaviour:
   objectToRemove: {fileID: 3623558265481915961}
   agent: {fileID: 5076303605537096934}
   animator: {fileID: 8257980848386598237}
-  behavioursToDisableOnDismiss: []
+  behavioursToDisableOnDismiss:
+  - {fileID: 0}
   collidersToDisableOnDismiss: []
   walkAwayTime: 1.5
   destroyDelay: 2
-  manualWalkSpeed: 2
+  manualWalkSpeed: 3.5
   destroyOnDismiss: 1
   speedFloatName: Speed
   walkingBoolName: IsWalking

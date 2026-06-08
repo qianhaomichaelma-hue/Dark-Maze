@@ -10,6 +10,10 @@ namespace DarkMazeUI
         [SerializeField] private GameObject barRoot;
         [SerializeField] private InventorySlotUI[] slotUIs;
 
+        [Header("Display Options")]
+        [SerializeField] private bool showItemNames = true;
+        [SerializeField] private bool showItemIcons = true;
+
         [Header("Options")]
         [SerializeField] private bool refreshEveryFrame = true;
         [SerializeField] private bool hideWhenInventoryEmpty = true;
@@ -51,10 +55,15 @@ namespace DarkMazeUI
             {
                 for (int i = 0; i < slotUIs.Length; i++)
                 {
-                    if (slotUIs[i] != null)
+                    if (slotUIs[i] == null)
+                        continue;
+
+                    if (hideEmptySlots)
+                        slotUIs[i].gameObject.SetActive(false);
+                    else
                     {
-                        slotUIs[i].gameObject.SetActive(!hideEmptySlots);
-                        slotUIs[i].SetData("No Inventory", 0, false, true);
+                        slotUIs[i].gameObject.SetActive(true);
+                        slotUIs[i].SetEmpty();
                     }
                 }
 
@@ -84,7 +93,7 @@ namespace DarkMazeUI
                     else
                     {
                         slotUIs[i].gameObject.SetActive(true);
-                        slotUIs[i].SetData("Empty", 0, false, true);
+                        slotUIs[i].SetEmpty();
                     }
 
                     continue;
@@ -93,13 +102,15 @@ namespace DarkMazeUI
                 slotUIs[i].gameObject.SetActive(true);
 
                 var slot = slots[i];
-                bool selected = i == currentIndex;
+                bool isSelected = i == currentIndex;
 
                 slotUIs[i].SetData(
-                    slot.item.displayName,
+                    slot.item,
                     slot.count,
-                    selected,
-                    false
+                    isSelected,
+                    false,
+                    showItemNames,
+                    showItemIcons
                 );
             }
         }
