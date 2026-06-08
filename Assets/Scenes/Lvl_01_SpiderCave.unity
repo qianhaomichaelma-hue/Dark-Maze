@@ -127004,7 +127004,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6562112968182197045, guid: 64d13543bdb43ff439d2638c33a39d43, type: 3}
       propertyPath: maxChaseHeightDifference
-      value: 4
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562112968182197045, guid: 64d13543bdb43ff439d2638c33a39d43, type: 3}
+      propertyPath: maxDetectHeightDifference
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 6562112968182197045, guid: 64d13543bdb43ff439d2638c33a39d43, type: 3}
       propertyPath: 'patrolPoints.Array.data[0]'
@@ -278694,7 +278698,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6562112968182197045, guid: 64d13543bdb43ff439d2638c33a39d43, type: 3}
       propertyPath: maxChaseHeightDifference
-      value: 4
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562112968182197045, guid: 64d13543bdb43ff439d2638c33a39d43, type: 3}
+      propertyPath: maxDetectHeightDifference
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 6562112968182197045, guid: 64d13543bdb43ff439d2638c33a39d43, type: 3}
       propertyPath: 'patrolPoints.Array.data[0]'
